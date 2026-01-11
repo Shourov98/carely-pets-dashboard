@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MoreHorizontal, ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import ConfirmModal from "../report/ConfirmModal";
 import { useRouter } from "next/navigation";
@@ -9,6 +9,19 @@ export default function AdoptionManagementPage() {
   const [menuOpenId, setMenuOpenId] = useState<number | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+
+  const menuRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpenId(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const router = useRouter();
 
@@ -137,7 +150,10 @@ export default function AdoptionManagementPage() {
                   </button>
 
                   {menuOpenId === item.id && (
-                    <div className="absolute right-5 mt-2 w-32 bg-white border rounded-xl shadow-md z-20">
+                    <div
+                      ref={menuRef}
+                      className="absolute right-5 mt-2 w-32 bg-white border rounded-xl shadow-md z-20"
+                    >
                       <button
                         className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-50"
                         onClick={() =>

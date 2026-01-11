@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MoreHorizontal } from "lucide-react";
 import ConfirmModal from "../report/ConfirmModal";
 import { useRouter } from "next/navigation";
@@ -10,6 +10,7 @@ export default function AdoptRequestsPage() {
   const [menuOpen, setMenuOpen] = useState<number | null>(null);
   const [deleteModal, setDeleteModal] = useState(false);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
 
   const router = useRouter();
 
@@ -66,6 +67,17 @@ export default function AdoptRequestsPage() {
     setDeleteModal(false);
   };
 
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
     <div className="p-6">
       {/* HEADER */}
@@ -82,14 +94,17 @@ export default function AdoptRequestsPage() {
         {/* STATUS FILTER */}
         <div className="relative">
           <button
-            className="border px-4 py-2 rounded-lg text-gray-800 bg-white flex items-center gap-2"
+            className="px-4 py-2 border-0 rounded-xl text-gray-800 bg-[#00a7c7]/30 flex items-center gap-2"
             onClick={() => setMenuOpen(menuOpen === -1 ? null : -1)}
           >
             Status ▾
           </button>
 
           {menuOpen === -1 && (
-            <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-xl border z-20">
+            <div
+              ref={menuRef}
+              className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-xl border z-20"
+            >
               <button
                 onClick={() => {
                   setStatusFilter("Pending");
@@ -177,7 +192,10 @@ export default function AdoptRequestsPage() {
                   </button>
 
                   {menuOpen === item.id && (
-                    <div className="absolute right-6 mt-2 w-40 bg-white shadow-lg rounded-xl border z-20">
+                    <div
+                      ref={menuRef}
+                      className="absolute right-6 mt-2 w-40 bg-white shadow-lg rounded-xl border-0 z-20"
+                    >
                       <button
                         onClick={() =>
                           router.push(`/dashboard/adoption-requests/${item.id}`)

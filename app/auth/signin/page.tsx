@@ -1,107 +1,77 @@
 "use client";
 
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { Eye, EyeOff, Mail, Lock } from "lucide-react";
+import { useState } from "react";
 
-export default function SigninPage() {
-  const router = useRouter();
+export default function LoginPage() {
+  const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <div className="w-full">
+    <div className="w-full flex flex-col items-center text-center">
       {/* Logo */}
-      <h1 className="text-3xl sm:text-4xl font-semibold text-center text-black mb-2">
-        LOGO
-      </h1>
+      <div className="flex items-center gap-2 mb-6">
+        <Image src="/logo-auth.svg" alt="Carely Pets" width={225} height={50} />
+      </div>
 
-      {/* Headings */}
-      <h2 className="text-2xl sm:text-3xl font-semibold text-center text-black mb-2">
-        Welcome Back!
-      </h2>
-      <p className="text-text-tertiary text-center mb-6 text-sm text-black">
-        To login, enter your email address
+      {/* Heading */}
+      <h1 className="text-2xl font-semibold text-gray-900">Welcome Back !</h1>
+      <p className="text-sm text-gray-500 mt-1 mb-6">
+        To login, enter your email address and password.
       </p>
 
       {/* Form */}
-      <form className="space-y-5 sm:space-y-6">
+      <form className="w-full space-y-4">
         {/* Email */}
-        <div>
-          <label className="block text-gray-600 text-sm font-semibold text-text-tertiary mb-2">
-            Email
-          </label>
-          <div className="flex items-center bg-surface-secondary border border-border-secondary rounded-xl px-4 py-3 sm:py-3.5">
-            <Image
-              src="/icons/mail-01.svg"
-              alt="Mail icon"
-              width={20}
-              height={20}
-              className="w-5 h-5 text-action mr-2"
-            />
+        <div className="text-left">
+          <label className="text-xs font-medium text-gray-600">EMAIL</label>
+          <div className="mt-1 flex items-center gap-2 rounded-xl border border-gray-200 px-3 py-2 focus-within:border-sky-400">
+            <Mail className="w-5 h-5 text-sky-500" />
             <input
               type="email"
               placeholder="Enter email"
-              required
-              className="flex-1 text-black bg-transparent focus:outline-none text-text-secondary text-sm sm:text-base"
+              className="w-full text-sm outline-none placeholder:text-gray-400"
             />
           </div>
         </div>
 
         {/* Password */}
-        <div>
-          <label className="block text-gray-600 text-sm font-semibold text-text-tertiary mb-2">
-            Password
-          </label>
-          <div className="flex items-center bg-surface-secondary border border-border-secondary rounded-xl px-4 py-3 sm:py-3.5">
-            <Image
-              src="/icons/square-lock-01.svg"
-              alt="Lock icon"
-              width={20}
-              height={20}
-              className="w-5 h-5 text-action mr-2"
-            />
+        <div className="text-left">
+          <label className="text-xs font-medium text-gray-600">PASSWORD</label>
+          <div className="mt-1 flex items-center gap-2 rounded-xl border border-gray-200 px-3 py-2 focus-within:border-sky-400">
+            <Lock className="w-5 h-5 text-sky-500" />
             <input
-              type="password"
-              placeholder="Enter password"
-              required
-              className="flex-1 text-black bg-transparent focus:outline-none text-text-secondary text-sm sm:text-base"
+              type={showPassword ? "text" : "password"}
+              placeholder="Password"
+              className="w-full text-sm outline-none placeholder:text-gray-400"
             />
-            <Image
-              src="/icons/view.svg"
-              alt="Lock icon"
-              width={20}
-              height={20}
-              className="w-5 h-5 text-action mr-2"
-            />
-          </div>
-
-          <div className="text-right mt-2">
-            <a
-              href="/forgot-password"
-              className="text-blue-600 hover:text-blue-800 text-sm sm:text-base"
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="text-gray-400 hover:text-sky-500"
             >
-              Forgot Password?
-            </a>
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
           </div>
         </div>
 
-        {/* Login Button */}
+        {/* Forgot password */}
+        <div className="text-right">
+          <button
+            type="button"
+            className="text-xs text-sky-600 hover:underline"
+          >
+            Forgot Password?
+          </button>
+        </div>
+
+        {/* Login button */}
         <button
           type="submit"
-          className="
-            w-full bg-action bg-blue-500 hover:bg-blue-700 text-text-inverted
-            py-3 sm:py-3.5 rounded-xl
-            transition
-          "
+          className="w-full rounded-xl bg-sky-200 py-3 text-sm font-medium text-sky-900 hover:bg-sky-300 transition"
         >
           Login
         </button>
-
-        {/* Footer */}
-        <p className="text-text-tertiary text-center text-sm text-black">
-          Don’t have an account?{" "}
-          <a href="/signup" className="text-blue-600 hover:text-blue-800">
-            Create an account
-          </a>
-        </p>
       </form>
     </div>
   );

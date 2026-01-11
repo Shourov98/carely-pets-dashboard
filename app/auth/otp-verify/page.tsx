@@ -10,12 +10,11 @@ export default function OtpVerifyPage() {
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
 
   const handleChange = (index: number, value: string) => {
-    if (!/^[0-9]?$/.test(value)) return; // only single digit numbers
+    if (!/^[0-9]?$/.test(value)) return;
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
 
-    // Move to next input automatically
     if (value && index < 3) {
       inputRefs.current[index + 1]?.focus();
     }
@@ -34,40 +33,42 @@ export default function OtpVerifyPage() {
     e.preventDefault();
     const code = otp.join("");
     if (code.length === 4) {
-      // verify code logic here
-      console.log("OTP Submitted:", code);
-      router.push("/reset-password"); // example next step
+      router.push("/reset-password");
     }
   };
 
   const handleResend = () => {
-    console.log("Resend OTP triggered");
-    // resend logic here
+    console.log("Resend OTP");
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full flex flex-col items-center text-center">
       {/* Logo */}
-      <h1 className="text-3xl font-semibold text-center text-black mb-4">
-        Logo
-      </h1>
+      <div className="mb-6">
+        <Image
+          src="/logo-auth.svg"
+          alt="Carely Pets"
+          width={225}
+          height={50}
+          priority
+        />
+      </div>
 
       {/* Title */}
-      <h2 className="text-2xl font-semibold text-center text-gray-700 mb-1">
-        Verify Code
-      </h2>
-      <p className="text-center text-gray-800 mb-6 text-sm sm:text-base">
-        We sent an OTP code to your email <br />
-        <span className="text-blue-700 font-medium">example@gmail.com</span>.
-        Enter the code below to verify within 1 min.
+      <h1 className="text-2xl font-semibold text-gray-900">Verify Code</h1>
+      <p className="text-sm text-gray-500 mt-1 mb-6">
+        We sent OTP code to your email <br />
+        <span className="font-medium text-gray-700">example@gmail.com</span>.
+        Enter the code below to verify.
       </p>
 
-      {/* OTP Input Fields */}
+      {/* Form */}
       <form
         onSubmit={handleSubmit}
-        className="flex flex-col items-center gap-6"
+        className="w-full flex flex-col items-center gap-6"
       >
-        <div className="flex justify-center gap-3 sm:gap-4">
+        {/* OTP Inputs */}
+        <div className="flex gap-3">
           {otp.map((digit, index) => (
             <input
               key={index}
@@ -81,55 +82,33 @@ export default function OtpVerifyPage() {
               onChange={(e) => handleChange(index, e.target.value)}
               onKeyDown={(e) => handleKeyDown(index, e)}
               className="
-                w-12 sm:w-14 h-12 sm:h-14 text-center text-lg sm:text-xl font-semibold
-                border border-border-secondary rounded-xl
-                bg-surface-secondary focus:outline-none focus:border-blue-500
-                text-gray-800
+                w-14 h-14 rounded-xl text-center text-gray-800 text-lg font-semibold
+                border border-gray-300
+                focus:border-sky-500 focus:outline-none
               "
             />
           ))}
         </div>
 
-        {/* Submit Button */}
+        {/* Submit */}
         <button
           type="submit"
-          className="
-            w-full bg-blue-500 hover:bg-blue-700
-            text-text-inverted font-semibold
-            py-3 sm:py-3.5 rounded-lg transition
-          "
+          className="w-full rounded-xl bg-sky-200 py-3 text-sm font-medium text-sky-900 hover:bg-sky-300 transition"
         >
           Next
         </button>
 
-        {/* Resend and Back */}
-        <div className="flex flex-col items-center gap-3 text-sm sm:text-base mt-1">
-          <p className="text-gray-700">
-            Don’t receive OTP?{" "}
-            <button
-              type="button"
-              onClick={handleResend}
-              className="text-blue-500 hover:text-blue-700 font-semibold"
-            >
-              Resend again
-            </button>
-          </p>
-
+        {/* Resend */}
+        <p className="text-sm text-gray-600">
+          Don’t receive OTP?{" "}
           <button
             type="button"
-            onClick={() => router.push("/signin")}
-            className="flex items-center gap-2 text-blue-500 hover:text-blue-700 transition"
+            onClick={handleResend}
+            className="text-sky-600 font-medium hover:underline"
           >
-            <Image
-              src="/icons/arrow-left-01.svg"
-              alt="Back icon"
-              width={20}
-              height={20}
-              className="w-4 h-4"
-            />
-            Back to Login
+            Resend again
           </button>
-        </div>
+        </p>
       </form>
     </div>
   );

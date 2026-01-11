@@ -12,40 +12,44 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full flex flex-col items-center text-center">
       {/* Logo */}
-      <h1 className="text-3xl font-semibold text-center text-black mb-4">
-        Logo
-      </h1>
+      <div className="flex items-center gap-2 mb-6">
+        <Image
+          src="/logo-auth.svg"
+          alt="Carely Pets"
+          width={225}
+          height={50}
+          priority
+        />
+      </div>
 
       {/* Title */}
-      <h2 className="text-2xl font-semibold text-center text-black mb-1">
-        Forgot Password
-      </h2>
-      <p className="text-center text-gray-700 mb-6 text-sm sm:text-base">
+      <h1 className="text-2xl font-semibold text-gray-900">
+        Forgot Password !
+      </h1>
+      <p className="text-sm text-gray-500 mt-1 mb-6">
         Enter your email to reset password
       </p>
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="w-full space-y-5">
         {/* Email */}
-        <div>
-          <label className="block text-gray-600 text-sm font-semibold text-text-tertiary mb-2">
-            Email
-          </label>
-          <div className="flex items-center bg-surface-secondary border border-border-secondary rounded-xl px-4 py-3 sm:py-3.5">
+        <div className="text-left">
+          <label className="text-xs font-medium text-gray-600">EMAIL</label>
+          <div className="mt-1 flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-3 focus-within:border-sky-400">
             <Image
               src="/icons/mail-01.svg"
               alt="Email icon"
               width={20}
               height={20}
-              className="w-5 h-5 text-action mr-2"
+              className="w-5 h-5"
             />
             <input
               type="email"
               placeholder="Enter email"
               required
-              className="flex-1 bg-transparent focus:outline-none text-gray-700 text-sm sm:text-base"
+              className="w-full bg-transparent text-sm outline-none placeholder:text-gray-400"
             />
           </div>
         </div>
@@ -53,17 +57,17 @@ export default function ForgotPasswordPage() {
         {/* Submit Button */}
         <button
           type="submit"
-          className="
-            w-full bg-blue-500 hover:bg-blue-700
-            text-text-inverted font-semibold
-            py-3 sm:py-3.5 rounded-lg transition
-          "
+          className="w-full rounded-xl bg-sky-200 py-3 text-sm font-medium text-sky-900 hover:bg-sky-300 transition"
         >
           Next
         </button>
 
         {/* Back to Login */}
-        <div className="flex items-center justify-center gap-2 text-sm sm:text-base mt-2">
+        <button
+          type="button"
+          onClick={() => router.push("/signin")}
+          className="flex items-center justify-center gap-2 text-sm text-gray-700 hover:text-sky-600 transition"
+        >
           <Image
             src="/icons/arrow-left-01.svg"
             alt="Back icon"
@@ -71,14 +75,8 @@ export default function ForgotPasswordPage() {
             height={16}
             className="w-4 h-4"
           />
-          <button
-            type="button"
-            onClick={() => router.push("/signin")}
-            className="text-black hover:text-blue-700 font-medium transition"
-          >
-            Back to Login
-          </button>
-        </div>
+          Back to Login
+        </button>
       </form>
     </div>
   );
