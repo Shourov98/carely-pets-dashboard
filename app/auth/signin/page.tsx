@@ -2,10 +2,30 @@
 
 import Image from "next/image";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+
+import { login } from "../../store/authSlice";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
 
 export default function LoginPage() {
+  const dispatch = useAppDispatch();
+  const { status, error } = useAppSelector((state) => state.auth);
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  useEffect(() => {
+    if (status === "succeeded") {
+      router.push("/dashboard/dashboard");
+    }
+  }, [router, status]);
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    dispatch(login({ email, password }));
+  };
 
   return (
     <div className="w-full flex flex-col items-center text-center">
@@ -21,7 +41,7 @@ export default function LoginPage() {
       </p>
 
       {/* Form */}
-      <form className="w-full space-y-4">
+      <form className="w-full space-y-4" onSubmit={handleSubmit}>
         {/* Email */}
         <div className="text-left">
           <label className="text-xs font-medium text-gray-600">EMAIL</label>
@@ -30,7 +50,9 @@ export default function LoginPage() {
             <input
               type="email"
               placeholder="Enter email"
-              className="w-full text-sm outline-none placeholder:text-gray-400"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              className="w-full text-gray-800 text-sm outline-none placeholder:text-gray-400"
             />
           </div>
         </div>
@@ -43,7 +65,9 @@ export default function LoginPage() {
             <input
               type={showPassword ? "text" : "password"}
               placeholder="Password"
-              className="w-full text-sm outline-none placeholder:text-gray-400"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              className="w-full text-gray-800 text-sm outline-none placeholder:text-gray-400"
             />
             <button
               type="button"
@@ -68,10 +92,16 @@ export default function LoginPage() {
         {/* Login button */}
         <button
           type="submit"
-          className="w-full rounded-xl bg-sky-200 py-3 text-sm font-medium text-sky-900 hover:bg-sky-300 transition"
+          className="w-full rounded-xl bg-sky-200 py-3 text-sm font-medium text-sky-900 hover:bg-sky-300 transition disabled:cursor-not-allowed disabled:opacity-70"
+          disabled={status === "loading"}
         >
-          Login
+          {status === "loading" ? "Signing in..." : "Login"}
         </button>
+        {error ? (
+          <p className="text-xs text-red-500" role="alert">
+            {error}
+          </p>
+        ) : null}
       </form>
     </div>
   );
