@@ -1,25 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MoreVertical, Plus } from "lucide-react";
 import Link from "next/link";
 
-interface BreedItem {
-  id: number;
-  type: string;
-  breedCount: number;
-}
-
-const sampleData: BreedItem[] = [
-  { id: 1, type: "Dog", breedCount: 5 },
-  { id: 2, type: "Cat", breedCount: 3 },
-  { id: 3, type: "Bird", breedCount: 53 },
-  { id: 4, type: "Exotic Pet", breedCount: 3 },
-  { id: 5, type: "Small Pet", breedCount: 2 },
-];
+import { fetchPetTypes } from "../../store/petSlice";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
 
 export default function PetBreedPage() {
-  const [openMenu, setOpenMenu] = useState<number | null>(null);
+  const dispatch = useAppDispatch();
+  const { petTypes, status, error } = useAppSelector((state) => state.pet);
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (status === "idle") {
+      dispatch(fetchPetTypes());
+    }
+  }, [dispatch, status]);
 
   return (
     <div className="p-6 max-w-full">
@@ -54,11 +51,32 @@ export default function PetBreedPage() {
           </thead>
 
           <tbody className="text-gray-800">
-            {sampleData.map((item, index) => (
+            {status === "loading" && (
+              <tr>
+                <td className="py-6 px-5 text-center" colSpan={4}>
+                  Loading pet types...
+                </td>
+              </tr>
+            )}
+            {status === "failed" && (
+              <tr>
+                <td className="py-6 px-5 text-center text-red-600" colSpan={4}>
+                  {error ?? "Failed to load pet types."}
+                </td>
+              </tr>
+            )}
+            {status !== "loading" && status !== "failed" && !petTypes.length && (
+              <tr>
+                <td className="py-6 px-5 text-center" colSpan={4}>
+                  No pet types found.
+                </td>
+              </tr>
+            )}
+            {petTypes.map((item, index) => (
               <tr key={item.id} className="border-b border-gray-300">
                 <td className="py-4 px-5">{index + 1}</td>
-                <td className="py-4 px-5">{item.type}</td>
-                <td className="py-4 px-5">{item.breedCount}</td>
+                <td className="py-4 px-5">{item.name}</td>
+                <td className="py-4 px-5">{item.petBreedCount ?? 0}</td>
 
                 {/* ACTION MENU */}
                 <td className="py-4 px-5 relative text-center">

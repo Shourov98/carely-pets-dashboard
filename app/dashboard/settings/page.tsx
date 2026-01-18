@@ -1,13 +1,22 @@
 "use client";
 
-import { useState } from "react";
-import { ChevronRight, PencilLine, Check, X } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { PencilLine, Check, X } from "lucide-react";
+import { useAppSelector } from "../../store/hooks";
 
 export default function SettingsPage() {
+  const accessToken = useAppSelector((state) => state.auth.tokens?.accessToken);
   const [isEditingTax, setIsEditingTax] = useState(false);
   const [isEditingServices, setIsEditingServices] = useState(false);
 
-  const [tax, setTax] = useState("5%");
+  const [taxStatus, setTaxStatus] = useState<
+    "idle" | "loading" | "succeeded" | "failed"
+  >("idle");
+  const [taxError, setTaxError] = useState<string | null>(null);
+  const [taxPercent, setTaxPercent] = useState("");
+  const [originalTaxPercent, setOriginalTaxPercent] = useState<number | null>(
+    null
+  );
   const [services, setServices] = useState({
     vet: "$250.00",
     walking: "$250.00",
@@ -15,7 +24,6 @@ export default function SettingsPage() {
     training: "$250.00",
   });
 
-  const originalTax = "5%";
   const originalServices = {
     vet: "$250.00",
     walking: "$250.00",
@@ -23,10 +31,129 @@ export default function SettingsPage() {
     training: "$250.00",
   };
 
-  const saveTax = () => setIsEditingTax(false);
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+  const normalizedBaseUrl = baseUrl ? baseUrl.replace(/\/+$/, "") : "";
+
+  const fetchTaxSettings = useCallback(async () => {
+    if (!normalizedBaseUrl) {
+      setTaxStatus("failed");
+      setTaxError("NEXT_PUBLIC_API_BASE_URL is not set.");
+      return;
+    }
+
+    if (!accessToken) {
+      setTaxStatus("failed");
+      setTaxError("Missing access token.");
+      return;
+    }
+
+    setTaxStatus("loading");
+    setTaxError(null);
+
+    try {
+      const response = await fetch(`${normalizedBaseUrl}/admin/settings/tax`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        let message = "Failed to fetch tax settings.";
+        try {
+          const errorBody = await response.json();
+          message = errorBody?.message ?? message;
+        } catch {
+          // Keep fallback message.
+        }
+        throw new Error(message);
+      }
+
+      const data = await response.json();
+      const percent = data?.data?.percent;
+      if (typeof percent !== "number") {
+        throw new Error("Invalid tax settings response.");
+      }
+
+      setTaxPercent(String(percent));
+      setOriginalTaxPercent(percent);
+      setTaxStatus("succeeded");
+    } catch (err) {
+      setTaxStatus("failed");
+      setTaxError(
+        err instanceof Error ? err.message : "Failed to fetch tax settings."
+      );
+    }
+  }, [accessToken, normalizedBaseUrl]);
+
+  useEffect(() => {
+    if (taxStatus === "idle") {
+      void fetchTaxSettings();
+    }
+  }, [fetchTaxSettings, taxStatus]);
+
+  const saveTax = async () => {
+    if (!normalizedBaseUrl) {
+      setTaxError("NEXT_PUBLIC_API_BASE_URL is not set.");
+      return;
+    }
+
+    if (!accessToken) {
+      setTaxError("Missing access token.");
+      return;
+    }
+
+    const parsedPercent = Number(taxPercent);
+    if (!Number.isFinite(parsedPercent)) {
+      setTaxError("Tax must be a valid number.");
+      return;
+    }
+
+    setTaxStatus("loading");
+    setTaxError(null);
+
+    try {
+      const response = await fetch(`${normalizedBaseUrl}/admin/settings/tax`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ percent: parsedPercent }),
+      });
+
+      if (!response.ok) {
+        let message = "Failed to update tax settings.";
+        try {
+          const errorBody = await response.json();
+          message = errorBody?.message ?? message;
+        } catch {
+          // Keep fallback message.
+        }
+        throw new Error(message);
+      }
+
+      const data = await response.json();
+      const percent = data?.data?.percent ?? parsedPercent;
+      setTaxPercent(String(percent));
+      setOriginalTaxPercent(percent);
+      setTaxStatus("succeeded");
+      setIsEditingTax(false);
+    } catch (err) {
+      setTaxStatus("failed");
+      setTaxError(
+        err instanceof Error ? err.message : "Failed to update tax settings."
+      );
+    }
+  };
+
   const cancelTax = () => {
-    setTax(originalTax);
+    if (originalTaxPercent !== null) {
+      setTaxPercent(String(originalTaxPercent));
+    }
     setIsEditingTax(false);
+    setTaxError(null);
   };
 
   const saveServices = () => setIsEditingServices(false);
@@ -68,6 +195,7 @@ export default function SettingsPage() {
               </button>
               <button
                 onClick={saveTax}
+                disabled={taxStatus === "loading"}
                 className="flex items-center gap-2 bg-[#D6F2F8] px-4 py-1.5 rounded-xl text-gray-800 hover:bg-[#c9edf5]"
               >
                 <Check className="w-4 h-4" /> Save
@@ -80,14 +208,23 @@ export default function SettingsPage() {
         <div className="mt-6">
           <p className="text-xs font-semibold text-gray-600">TAX</p>
 
-          {!isEditingTax ? (
-            <p className="mt-2 text-gray-800">{tax}</p>
+          {taxStatus === "loading" && !isEditingTax ? (
+            <p className="mt-2 text-gray-800">Loading...</p>
+          ) : !isEditingTax ? (
+            <p className="mt-2 text-gray-800">
+              {taxPercent ? `${taxPercent}%` : "—"}
+            </p>
           ) : (
             <input
               className="mt-2 border border-gray-300 w-full rounded-lg px-3 py-2 bg-gray-50 text-gray-700 focus:outline-none"
-              value={tax}
-              onChange={(e) => setTax(e.target.value)}
+              value={taxPercent}
+              onChange={(e) => setTaxPercent(e.target.value)}
+              inputMode="decimal"
             />
+          )}
+
+          {taxError && (
+            <p className="mt-3 text-sm text-red-600">{taxError}</p>
           )}
 
           <hr className="mt-4" />

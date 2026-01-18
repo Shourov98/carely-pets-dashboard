@@ -4,6 +4,7 @@ type PetType = {
   id: string;
   name: string;
   slug: string;
+  petBreedCount?: number;
 };
 
 type PetState = {
@@ -74,6 +75,7 @@ export const fetchPetTypes = createAsyncThunk<
     id: petType.id ?? petType._id ?? "",
     name: petType.name,
     slug: petType.slug,
+    petBreedCount: petType.petBreedCount ?? 0,
   }));
 });
 
@@ -120,6 +122,7 @@ export const createPetType = createAsyncThunk<
     id: petType?.id ?? petType?._id ?? "",
     name: petType?.name,
     slug: petType?.slug,
+    petBreedCount: petType?.petBreedCount ?? 0,
   };
 
   if (!mappedPetType.id || !mappedPetType.name || !mappedPetType.slug) {
@@ -174,6 +177,7 @@ export const updatePetType = createAsyncThunk<
     id: petType?.id ?? petType?._id ?? "",
     name: petType?.name,
     slug: petType?.slug,
+    petBreedCount: petType?.petBreedCount ?? 0,
   };
 
   if (!mappedPetType.id || !mappedPetType.name || !mappedPetType.slug) {
