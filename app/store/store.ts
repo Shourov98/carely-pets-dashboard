@@ -1,5 +1,4 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
-import type { PreloadedState } from "@reduxjs/toolkit";
 
 import authReducer, { type AuthState, initialAuthState } from "./authSlice";
 import petReducer from "./petSlice";
@@ -40,8 +39,8 @@ const loadAuthFromStorage = (): AuthState | undefined => {
 };
 
 const preloadedAuth = loadAuthFromStorage();
-const preloadedState: PreloadedState<RootState> | undefined = preloadedAuth
-  ? { auth: preloadedAuth }
+const preloadedState = preloadedAuth
+  ? ({ auth: preloadedAuth } as Partial<RootState>)
   : undefined;
 
 export const store = configureStore({
