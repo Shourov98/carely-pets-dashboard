@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { Eye, ChevronDown } from "lucide-react";
 
 export default function ViewPetPage() {
@@ -179,9 +180,14 @@ export default function ViewPetPage() {
                 </div>
               </div>
 
-              <button className="mt-4 text-sm text-gray-700 font-medium w-full py-2 rounded-lg bg-gray-50 hover:bg-gray-100 flex items-center justify-center gap-1">
+              <Link
+                href={`/dashboard/adoption-list/records?type=${encodeURIComponent(
+                  rec.label
+                )}`}
+                className="mt-4 text-sm text-gray-700 font-medium w-full py-2 rounded-lg bg-gray-50 hover:bg-gray-100 flex items-center justify-center gap-1"
+              >
                 View →
-              </button>
+              </Link>
             </div>
           ))}
         </div>

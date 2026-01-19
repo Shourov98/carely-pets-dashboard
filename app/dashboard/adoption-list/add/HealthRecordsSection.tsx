@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import {
   Bug,
   ChevronRight,
@@ -133,9 +134,14 @@ export default function HealthRecordsSection({
                 </span>
               </div>
 
-              <button className="mt-4 w-full bg-white text-gray-600 text-sm font-medium rounded-full py-2 flex items-center justify-center gap-1 border border-gray-200 hover:bg-gray-100">
+              <Link
+                href={`/dashboard/adoption-list/records?type=${encodeURIComponent(
+                  item.title
+                )}`}
+                className="mt-4 w-full bg-white text-gray-600 text-sm font-medium rounded-full py-2 flex items-center justify-center gap-1 border border-gray-200 hover:bg-gray-100"
+              >
                 View <ChevronRight className="h-4 w-4" />
-              </button>
+              </Link>
             </div>
           );
         })}

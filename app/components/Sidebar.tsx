@@ -12,7 +12,8 @@ import {
   ChevronDown,
   Users,
   Handshake,
-  CreditCard,
+  ReceiptText,
+  BookLock,
   FileText,
   Settings,
   UserCircle,
@@ -67,6 +68,16 @@ const MENU = [
         ],
       },
       { label: "Report", icon: FileText, href: "/dashboard/report" },
+      {
+        label: "Terms & Conditions",
+        icon: ReceiptText,
+        href: "/dashboard/terms-conditions",
+      },
+      {
+        label: "Privacy Policy",
+        icon: BookLock,
+        href: "/dashboard/privacy-policy",
+      },
       { label: "Settings", icon: Settings, href: "/dashboard/settings" },
     ],
   },
@@ -101,7 +112,7 @@ export default function Sidebar({ collapsed }: { collapsed: boolean }) {
 
   return (
     <aside
-      className={`h-screen bg-white border-r fixed left-0 top-0 transition-all duration-300 ${
+      className={`h-screen bg-white border-r fixed left-0 top-0 transition-all duration-300 flex flex-col ${
         collapsed ? "w-20" : "w-64"
       }`}
     >
@@ -114,7 +125,7 @@ export default function Sidebar({ collapsed }: { collapsed: boolean }) {
         )}
       </div>
 
-      <div className="px-4 pt-2 space-y-4 overflow-y-auto">
+      <div className="px-4 pt-2 space-y-4 overflow-y-auto flex-1">
         {MENU.map((section) => (
           <div key={section.label}>
             {!collapsed && (

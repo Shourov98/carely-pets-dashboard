@@ -1,19 +1,63 @@
 "use client";
 
-import { X } from "lucide-react";
+import {
+  Bug,
+  Bone,
+  FileText,
+  Pill,
+  Scissors,
+  Stethoscope,
+  Syringe,
+  X,
+} from "lucide-react";
 import HealthRecordFormModal, {
   HealthRecordFormValues,
 } from "./HealthRecordFormModal";
 import { useState } from "react";
 
 const types = [
-  { label: "Vaccination", color: "bg-green-50", icon: "💉" },
-  { label: "Check-up", color: "bg-blue-50", icon: "🩺" },
-  { label: "Medication", color: "bg-red-50", icon: "💊" },
-  { label: "Tick & Flea", color: "bg-purple-50", icon: "🪳" },
-  { label: "Surgery", color: "bg-pink-50", icon: "🐾" },
-  { label: "Dental", color: "bg-orange-50", icon: "🦷" },
-  { label: "Other", color: "bg-gray-100", icon: "📄" },
+  {
+    label: "Vaccination",
+    icon: Syringe,
+    iconBg: "bg-green-100",
+    iconColor: "text-green-600",
+  },
+  {
+    label: "Check-up",
+    icon: Stethoscope,
+    iconBg: "bg-blue-100",
+    iconColor: "text-blue-600",
+  },
+  {
+    label: "Medication",
+    icon: Pill,
+    iconBg: "bg-red-100",
+    iconColor: "text-red-600",
+  },
+  {
+    label: "Tick & Flea",
+    icon: Bug,
+    iconBg: "bg-purple-100",
+    iconColor: "text-purple-600",
+  },
+  {
+    label: "Surgery",
+    icon: Scissors,
+    iconBg: "bg-pink-100",
+    iconColor: "text-pink-600",
+  },
+  {
+    label: "Dental",
+    icon: Bone,
+    iconBg: "bg-orange-100",
+    iconColor: "text-orange-600",
+  },
+  {
+    label: "Other",
+    icon: FileText,
+    iconBg: "bg-gray-200",
+    iconColor: "text-gray-600",
+  },
 ];
 
 interface RecordTypeModalProps {
@@ -44,7 +88,9 @@ export default function RecordTypeModal({
           </div>
 
           <div className="grid grid-cols-3 gap-4">
-            {types.map((t) => (
+            {types.map((t) => {
+              const Icon = t.icon;
+              return (
               <div
                 key={t.label}
                 onClick={() => {
@@ -53,10 +99,15 @@ export default function RecordTypeModal({
                 }}
                 className={`border rounded-xl p-3 cursor-pointer hover:bg-gray-50 flex flex-col items-center`}
               >
-                <span className="text-2xl">{t.icon}</span>
+                <span
+                  className={`h-9 w-9 rounded-full flex items-center justify-center ${t.iconBg}`}
+                >
+                  <Icon className={`h-4 w-4 ${t.iconColor}`} />
+                </span>
                 <p className="text-sm text-gray-800 mt-2">{t.label}</p>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>

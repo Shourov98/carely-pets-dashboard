@@ -50,6 +50,7 @@ export default function HealthRecordFormModal({
   const [attachments, setAttachments] = useState<File[]>([]);
   const [attachmentError, setAttachmentError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const maxFileSizeBytes = 15 * 1024 * 1024;
 
   if (!open) return null;
 
@@ -64,12 +65,19 @@ export default function HealthRecordFormModal({
     const files = Array.from(event.target.files ?? []);
     if (!files.length) return;
 
-    const next = [...attachments, ...files].slice(0, 3);
-    if (attachments.length + files.length > 3) {
-      setAttachmentError("You can upload up to 3 attachments.");
-    } else {
-      setAttachmentError(null);
+    const oversizeFiles = files.filter((file) => file.size > maxFileSizeBytes);
+    const allowedFiles = files.filter((file) => file.size <= maxFileSizeBytes);
+    const next = [...attachments, ...allowedFiles].slice(0, 3);
+    const errors: string[] = [];
+
+    if (oversizeFiles.length) {
+      errors.push("Each attachment must be 15MB or less.");
     }
+    if (attachments.length + allowedFiles.length > 3) {
+      errors.push("You can upload up to 3 attachments.");
+    }
+
+    setAttachmentError(errors.length ? errors.join(" ") : null);
 
     setAttachments(next);
     event.target.value = "";
@@ -82,6 +90,10 @@ export default function HealthRecordFormModal({
   const handleSave = () => {
     if (attachments.length < 1 || attachments.length > 3) {
       setAttachmentError("Attach between 1 and 3 files.");
+      return;
+    }
+    if (attachments.some((file) => file.size > maxFileSizeBytes)) {
+      setAttachmentError("Each attachment must be 15MB or less.");
       return;
     }
 

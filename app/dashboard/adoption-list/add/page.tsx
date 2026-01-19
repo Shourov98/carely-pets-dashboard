@@ -28,6 +28,7 @@ export default function AddPetForAdoption() {
   const accessToken = useAppSelector((state) => state.auth.tokens?.accessToken);
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
   const normalizedBaseUrl = baseUrl ? baseUrl.replace(/\/+$/, "") : "";
+  const maxFileSizeBytes = 15 * 1024 * 1024;
 
   const formatFileSize = (bytes: number) => {
     if (bytes < 1024) return `${bytes}B`;
@@ -40,12 +41,19 @@ export default function AddPetForAdoption() {
     const files = Array.from(event.target.files ?? []);
     if (!files.length) return;
 
-    const next = [...snaps, ...files].slice(0, 3);
-    if (snaps.length + files.length > 3) {
-      setSnapError("You can upload up to 3 snaps.");
-    } else {
-      setSnapError(null);
+    const oversizeFiles = files.filter((file) => file.size > maxFileSizeBytes);
+    const allowedFiles = files.filter((file) => file.size <= maxFileSizeBytes);
+    const next = [...snaps, ...allowedFiles].slice(0, 3);
+    const errors: string[] = [];
+
+    if (oversizeFiles.length) {
+      errors.push("Each snap must be 15MB or less.");
     }
+    if (snaps.length + allowedFiles.length > 3) {
+      errors.push("You can upload up to 3 snaps.");
+    }
+
+    setSnapError(errors.length ? errors.join(" ") : null);
     setSnaps(next);
     event.target.value = "";
   };
@@ -75,6 +83,10 @@ export default function AddPetForAdoption() {
       setSubmitError("Pet snaps must be between 1 and 3 files.");
       return;
     }
+    if (snaps.some((file) => file.size > maxFileSizeBytes)) {
+      setSubmitError("Each snap must be 15MB or less.");
+      return;
+    }
 
     const invalidRecord = healthRecords.find(
       (record) =>
@@ -83,6 +95,15 @@ export default function AddPetForAdoption() {
     if (invalidRecord) {
       setSubmitError(
         `Health record "${invalidRecord.type}" must include 1-3 attachments.`
+      );
+      return;
+    }
+    const oversizeRecord = healthRecords.find((record) =>
+      record.attachments.some((file) => file.size > maxFileSizeBytes)
+    );
+    if (oversizeRecord) {
+      setSubmitError(
+        `Health record "${oversizeRecord.type}" has files over 15MB.`
       );
       return;
     }
