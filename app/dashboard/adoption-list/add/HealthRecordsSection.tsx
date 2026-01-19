@@ -1,5 +1,6 @@
+"use client";
+
 import { useMemo, useState } from "react";
-import Link from "next/link";
 import {
   Bug,
   ChevronRight,
@@ -13,6 +14,9 @@ import {
 } from "lucide-react";
 import RecordTypeModal from "./RecordTypeModal";
 import { HealthRecordFormValues } from "./HealthRecordFormModal";
+import HealthRecordsModal, {
+  HealthRecordsModalRecord,
+} from "../components/HealthRecordsModal";
 
 const recordTypes = [
   {
@@ -82,6 +86,7 @@ export default function HealthRecordsSection({
   onAddRecord,
 }: HealthRecordsSectionProps) {
   const [openTypeModal, setOpenTypeModal] = useState(false);
+  const [viewType, setViewType] = useState<string | null>(null);
   const recordCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     records.forEach((record) => {
@@ -94,6 +99,24 @@ export default function HealthRecordsSection({
     onAddRecord?.(record);
     setOpenTypeModal(false);
   };
+
+  const recordsForView: HealthRecordsModalRecord[] = viewType
+    ? records
+        .filter((record) => record.type === viewType)
+        .map((record, index) => ({
+          id: `${record.type}-${index}`,
+          title: record.recordName || record.type,
+          subtitle: `${record.attachments.length} attachment${
+            record.attachments.length === 1 ? "" : "s"
+          }`,
+          attachments: record.attachments.map((file, fileIndex) => ({
+            id: `${record.type}-${index}-${fileIndex}`,
+            name: file.name,
+            type: file.type || "File",
+            file,
+          })),
+        }))
+    : [];
 
   return (
     <div className="space-y-5">
@@ -134,14 +157,15 @@ export default function HealthRecordsSection({
                 </span>
               </div>
 
-              <Link
-                href={`/dashboard/adoption-list/records?type=${encodeURIComponent(
-                  item.title
-                )}`}
+              <button
+                type="button"
+                onClick={() => {
+                  setViewType(item.title);
+                }}
                 className="mt-4 w-full bg-white text-gray-600 text-sm font-medium rounded-full py-2 flex items-center justify-center gap-1 border border-gray-200 hover:bg-gray-100"
               >
                 View <ChevronRight className="h-4 w-4" />
-              </Link>
+              </button>
             </div>
           );
         })}
@@ -172,6 +196,13 @@ export default function HealthRecordsSection({
           onSave={handleSaveRecord}
         />
       )}
+
+      <HealthRecordsModal
+        open={Boolean(viewType)}
+        title={`${viewType ?? ""} Records`}
+        records={recordsForView}
+        onClose={() => setViewType(null)}
+      />
     </div>
   );
 }

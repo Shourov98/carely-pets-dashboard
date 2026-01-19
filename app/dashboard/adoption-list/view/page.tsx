@@ -1,40 +1,178 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
-import { Eye, ChevronDown } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Eye } from "lucide-react";
+import HealthRecordsModal, {
+  type HealthRecordsModalRecord,
+} from "../components/HealthRecordsModal";
+
+type AttachmentType = "pdf" | "doc" | "image";
+
+interface RecordAttachment {
+  id: string;
+  name: string;
+  type: AttachmentType;
+  url: string;
+  size: string;
+}
+
+interface HealthRecord {
+  id: string;
+  type: string;
+  name: string;
+  updatedAt: string;
+  reminder: string;
+  attachments: RecordAttachment[];
+}
+
+const snaps = [
+  { id: 1, name: "File name", size: "245KB" },
+  { id: 2, name: "File name", size: "245KB" },
+  { id: 3, name: "File name", size: "245KB" },
+];
+
+const healthRecords = [
+  {
+    label: "Vaccination",
+    count: 12,
+    color: "bg-green-100",
+    dot: "bg-green-500",
+  },
+  { label: "Check-up", count: 12, color: "bg-blue-100", dot: "bg-blue-500" },
+  { label: "Medication", count: 12, color: "bg-red-100", dot: "bg-red-500" },
+  {
+    label: "Tick & Flea",
+    count: 12,
+    color: "bg-purple-100",
+    dot: "bg-purple-500",
+  },
+  { label: "Surgery", count: 12, color: "bg-pink-100", dot: "bg-pink-500" },
+  {
+    label: "Dental",
+    count: 12,
+    color: "bg-orange-100",
+    dot: "bg-orange-500",
+  },
+  { label: "Other", count: 12, color: "bg-gray-100", dot: "bg-gray-500" },
+];
+
+const recordData: HealthRecord[] = [
+    {
+      id: "1",
+      type: "Vaccination",
+      name: "Rabies vaccination",
+      updatedAt: "Jan 6, 2025",
+      reminder: "Reminder in 1 week",
+      attachments: [
+        {
+          id: "1-a",
+          name: "rabies-certificate.pdf",
+          type: "pdf",
+          url: "/file.svg",
+          size: "245KB",
+        },
+        {
+          id: "1-b",
+          name: "clinic-photo.jpg",
+          type: "image",
+          url: "/paw.svg",
+          size: "1.2MB",
+        },
+      ],
+    },
+    {
+      id: "2",
+      type: "Vaccination",
+      name: "DHLPP dose 2",
+      updatedAt: "Jan 6, 2025",
+      reminder: "Reminder in 1 week",
+      attachments: [
+        {
+          id: "2-a",
+          name: "dose2-document.doc",
+          type: "doc",
+          url: "/file.svg",
+          size: "180KB",
+        },
+      ],
+    },
+    {
+      id: "3",
+      type: "Check-up",
+      name: "Leptospirosis",
+      updatedAt: "Jan 6, 2025",
+      reminder: "Reminder in 1 week",
+      attachments: [
+        {
+          id: "3-a",
+          name: "lepto-summary.pdf",
+          type: "pdf",
+          url: "/file.svg",
+          size: "210KB",
+        },
+        {
+          id: "3-b",
+          name: "exam-photo.jpg",
+          type: "image",
+          url: "/paw.svg",
+          size: "980KB",
+        },
+      ],
+    },
+    {
+      id: "4",
+      type: "Dental",
+      name: "Bordetella",
+      updatedAt: "Jan 6, 2025",
+      reminder: "Reminder in 1 week",
+      attachments: [
+        {
+          id: "4-a",
+          name: "bordetella.pdf",
+          type: "pdf",
+          url: "/file.svg",
+          size: "196KB",
+        },
+      ],
+    },
+    {
+      id: "5",
+      type: "Medication",
+      name: "Parainfluenza",
+      updatedAt: "Jan 6, 2025",
+      reminder: "Reminder in 1 week",
+      attachments: [
+        {
+          id: "5-a",
+          name: "parainfluenza-image.jpg",
+          type: "image",
+          url: "/paw.svg",
+          size: "1.1MB",
+        },
+      ],
+    },
+];
 
 export default function ViewPetPage() {
-  const snaps = [
-    { id: 1, name: "File name", size: "245KB" },
-    { id: 2, name: "File name", size: "245KB" },
-    { id: 3, name: "File name", size: "245KB" },
-  ];
+  const [viewType, setViewType] = useState<string | null>(null);
 
-  const healthRecords = [
-    {
-      label: "Vaccination",
-      count: 12,
-      color: "bg-green-100",
-      dot: "bg-green-500",
-    },
-    { label: "Check-up", count: 12, color: "bg-blue-100", dot: "bg-blue-500" },
-    { label: "Medication", count: 12, color: "bg-red-100", dot: "bg-red-500" },
-    {
-      label: "Tick & Flea",
-      count: 12,
-      color: "bg-purple-100",
-      dot: "bg-purple-500",
-    },
-    { label: "Surgery", count: 12, color: "bg-pink-100", dot: "bg-pink-500" },
-    {
-      label: "Dental",
-      count: 12,
-      color: "bg-orange-100",
-      dot: "bg-orange-500",
-    },
-    { label: "Other", count: 12, color: "bg-gray-100", dot: "bg-gray-500" },
-  ];
+  const recordsForView: HealthRecordsModalRecord[] = useMemo(() => {
+    if (!viewType) return [];
+    return recordData
+      .filter((record) => record.type === viewType)
+      .map((record) => ({
+        id: record.id,
+        title: record.name,
+        subtitle: `Last updated ${record.updatedAt}, ${record.reminder}`,
+        attachments: record.attachments.map((attachment) => ({
+          id: attachment.id,
+          name: attachment.name,
+          type: attachment.type,
+          url: attachment.url,
+          sizeLabel: attachment.size,
+        })),
+      }));
+  }, [viewType]);
 
   return (
     <div className="px-6 py-5">
@@ -180,18 +318,24 @@ export default function ViewPetPage() {
                 </div>
               </div>
 
-              <Link
-                href={`/dashboard/adoption-list/records?type=${encodeURIComponent(
-                  rec.label
-                )}`}
+              <button
+                type="button"
+                onClick={() => setViewType(rec.label)}
                 className="mt-4 text-sm text-gray-700 font-medium w-full py-2 rounded-lg bg-gray-50 hover:bg-gray-100 flex items-center justify-center gap-1"
               >
                 View →
-              </Link>
+              </button>
             </div>
           ))}
         </div>
       </div>
+
+      <HealthRecordsModal
+        open={Boolean(viewType)}
+        title={`${viewType ?? ""} Records`}
+        records={recordsForView}
+        onClose={() => setViewType(null)}
+      />
     </div>
   );
 }
