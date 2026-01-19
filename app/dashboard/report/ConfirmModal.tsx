@@ -19,7 +19,7 @@ function ConfirmModal({
   title = "Are you sure you want to delete?",
   description = "By deleting this record, you won't be able to see it again. If you still want to continue press \"Delete\".",
   loading = false,
-}: ConfirmModalProps): JSX.Element | null {
+}: ConfirmModalProps): React.ReactElement | null {
   if (!open) return null;
 
   return (
