@@ -1,4 +1,9 @@
-export function GenderRow() {
+interface GenderRowProps {
+  value?: "male" | "female";
+  name?: string;
+}
+
+export function GenderRow({ value = "male", name = "gender" }: GenderRowProps) {
   return (
     <div>
       <label className="text-xs text-gray-500 font-medium">GENDER</label>
@@ -6,15 +11,20 @@ export function GenderRow() {
         <label className="flex items-center gap-2 cursor-pointer">
           <input
             type="radio"
-            name="gender"
+            name={name}
             className="h-4 w-4"
-            defaultChecked
+            defaultChecked={value === "male"}
           />
           Male
         </label>
 
         <label className="flex items-center gap-2 cursor-pointer">
-          <input type="radio" name="gender" className="h-4 w-4" />
+          <input
+            type="radio"
+            name={name}
+            className="h-4 w-4"
+            defaultChecked={value === "female"}
+          />
           Female
         </label>
       </div>

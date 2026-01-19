@@ -1,4 +1,12 @@
-export function VaccinationRow() {
+interface VaccinationRowProps {
+  value?: "yes" | "no";
+  name?: string;
+}
+
+export function VaccinationRow({
+  value = "yes",
+  name = "vaccinated",
+}: VaccinationRowProps) {
   return (
     <div>
       <label className="text-xs text-gray-500 font-medium">VACCINATED</label>
@@ -6,15 +14,20 @@ export function VaccinationRow() {
         <label className="flex items-center gap-2 cursor-pointer">
           <input
             type="radio"
-            name="vaccinated"
+            name={name}
             className="h-4 w-4"
-            defaultChecked
+            defaultChecked={value === "yes"}
           />
           Yes
         </label>
 
         <label className="flex items-center gap-2 cursor-pointer">
-          <input type="radio" name="vaccinated" className="h-4 w-4" />
+          <input
+            type="radio"
+            name={name}
+            className="h-4 w-4"
+            defaultChecked={value === "no"}
+          />
           No
         </label>
       </div>

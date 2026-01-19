@@ -1,4 +1,12 @@
-export function TrainingRow() {
+interface TrainingRowProps {
+  value?: "yes" | "no";
+  name?: string;
+}
+
+export function TrainingRow({
+  value = "yes",
+  name = "trained",
+}: TrainingRowProps) {
   return (
     <div>
       <label className="text-xs text-gray-500 font-medium">TRAINED</label>
@@ -6,15 +14,20 @@ export function TrainingRow() {
         <label className="flex items-center gap-2 cursor-pointer">
           <input
             type="radio"
-            name="trained"
+            name={name}
             className="h-4 w-4"
-            defaultChecked
+            defaultChecked={value === "yes"}
           />
           Yes
         </label>
 
         <label className="flex items-center gap-2 cursor-pointer">
-          <input type="radio" name="trained" className="h-4 w-4" />
+          <input
+            type="radio"
+            name={name}
+            className="h-4 w-4"
+            defaultChecked={value === "no"}
+          />
           No
         </label>
       </div>

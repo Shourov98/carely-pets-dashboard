@@ -19,7 +19,7 @@ export default function DashboardLayout({
       <Navbar collapsed={collapsed} toggleSidebar={toggleSidebar} />
 
       <main
-        className={`pt-24 px-10 bg-[#fafafa] min-h-screen transition-all duration-300 ${
+        className={`pt-24 pb-10 px-10 bg-white min-h-screen transition-all duration-300 ${
           collapsed ? "ml-20" : "ml-64"
         }`}
       >

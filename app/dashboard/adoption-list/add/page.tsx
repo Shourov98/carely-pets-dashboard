@@ -126,7 +126,7 @@ export default function AddPetForAdoption() {
                       {t}
                       <X className="h-4 w-4 cursor-pointer text-gray-600" />
                     </span>
-                  )
+                  ),
                 )}
               </div>
             </div>
