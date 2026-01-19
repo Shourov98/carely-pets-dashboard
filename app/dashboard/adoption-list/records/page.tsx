@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { ChevronRight, Eye, Download } from "lucide-react";
 
@@ -114,7 +114,7 @@ const recordData: HealthRecord[] = [
   },
 ];
 
-export default function HealthRecordsPage() {
+function HealthRecordsPageContent() {
   const searchParams = useSearchParams();
   const recordType = searchParams.get("type") ?? "Vaccination";
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -271,5 +271,13 @@ export default function HealthRecordsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function HealthRecordsPage() {
+  return (
+    <Suspense fallback={<div className="px-6 py-5">Loading...</div>}>
+      <HealthRecordsPageContent />
+    </Suspense>
   );
 }
