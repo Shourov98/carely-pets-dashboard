@@ -11,7 +11,7 @@
   "dependencies": {
     "@reduxjs/toolkit": "^2.11.2",
     "lucide-react": "^0.555.0",
-    "next": "16.0.5",
+    "next": "^16.2.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "react-redux": "^9.2.0",
@@ -24,7 +24,7 @@
     "@types/react-dom": "^19",
     "baseline-browser-mapping": "^2.9.15",
     "eslint": "^9",
-    "eslint-config-next": "16.0.5",
+    "eslint-config-next": "^16.2.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
