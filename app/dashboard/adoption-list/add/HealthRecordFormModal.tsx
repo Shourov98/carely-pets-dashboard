@@ -15,6 +15,9 @@ export interface HealthRecordFormValues {
   recordName: string;
   batchNumber: string;
   otherInfo: string;
+  cost: string;
+  date: string;
+  nextDueDate: string;
   vetDesignation: string;
   vetName: string;
   clinicName: string;
@@ -37,6 +40,9 @@ export default function HealthRecordFormModal({
   const [recordName, setRecordName] = useState("");
   const [batchNumber, setBatchNumber] = useState("");
   const [otherInfo, setOtherInfo] = useState("");
+  const [cost, setCost] = useState("");
+  const [date, setDate] = useState("");
+  const [nextDueDate, setNextDueDate] = useState("");
   const [vetDesignation, setVetDesignation] = useState("");
   const [vetName, setVetName] = useState("");
   const [clinicName, setClinicName] = useState("");
@@ -103,6 +109,9 @@ export default function HealthRecordFormModal({
       recordName,
       batchNumber,
       otherInfo,
+      cost,
+      date,
+      nextDueDate,
       vetDesignation,
       vetName,
       clinicName,
@@ -150,6 +159,24 @@ export default function HealthRecordFormModal({
             placeholder="Other information"
             value={otherInfo}
             onChange={(event) => setOtherInfo(event.target.value)}
+          />
+          <input
+            className="input"
+            placeholder="Cost"
+            value={cost}
+            onChange={(event) => setCost(event.target.value)}
+          />
+          <input
+            className="input"
+            type="date"
+            value={date}
+            onChange={(event) => setDate(event.target.value)}
+          />
+          <input
+            className="input"
+            type="date"
+            value={nextDueDate}
+            onChange={(event) => setNextDueDate(event.target.value)}
           />
         </div>
 

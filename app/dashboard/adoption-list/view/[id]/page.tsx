@@ -296,6 +296,9 @@ export default function ViewPetPage() {
           recordName: record.recordName,
           batchLotNo: record.batchNumber,
           otherInfo: record.otherInfo,
+          cost: record.cost,
+          date: record.date,
+          nextDueDate: record.nextDueDate,
         }),
       );
       healthPayload.append(
