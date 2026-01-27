@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Bug,
   Bone,
@@ -11,11 +11,13 @@ import {
   Stethoscope,
   Syringe,
 } from "lucide-react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import HealthRecordsModal, {
   type HealthRecordsModalRecord,
 } from "../../components/HealthRecordsModal";
 import { useAppSelector } from "../../../../store/hooks";
+import RecordTypeModal from "../../add/RecordTypeModal";
+import type { HealthRecordFormValues } from "../../add/HealthRecordFormModal";
 
 type AttachmentType = "pdf" | "doc" | "image";
 
@@ -33,7 +35,7 @@ interface HealthRecord {
   name: string;
   updatedAt: string;
   reminder: string;
-  attachments: RecordAttachment[];
+  attachments: Array<RecordAttachment | string>;
 }
 
 const healthRecordTypes = [
@@ -122,6 +124,7 @@ const getFileName = (url: string) => {
 
 export default function ViewPetPage() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const accessToken = useAppSelector((state) => state.auth.tokens?.accessToken);
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
   const normalizedBaseUrl = baseUrl ? baseUrl.replace(/\/+$/, "") : "";
@@ -129,78 +132,78 @@ export default function ViewPetPage() {
   const [status, setStatus] = useState<"idle" | "loading" | "failed">("idle");
   const [error, setError] = useState<string | null>(null);
   const [viewType, setViewType] = useState<string | null>(null);
+  const [addRecordOpen, setAddRecordOpen] = useState(false);
+  const [addRecordStatus, setAddRecordStatus] = useState<
+    "idle" | "loading" | "failed"
+  >("idle");
+  const [addRecordError, setAddRecordError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const fetchDetail = useCallback(async () => {
     const listingId = params?.id;
-    if (!listingId) return;
+    if (!listingId) return false;
     if (!normalizedBaseUrl) {
       setError("NEXT_PUBLIC_API_BASE_URL is not set.");
       setStatus("failed");
-      return;
+      return false;
     }
     if (!accessToken) {
       setError("Missing access token.");
       setStatus("failed");
-      return;
+      return false;
     }
 
-    let isMounted = true;
-    const fetchDetail = async () => {
-      setStatus("loading");
-      setError(null);
-      try {
-        const response = await fetch(
-          `${normalizedBaseUrl}/admin/adoptions/${listingId}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${accessToken}`,
-            },
+    setStatus("loading");
+    setError(null);
+    try {
+      const response = await fetch(
+        `${normalizedBaseUrl}/admin/adoptions/${listingId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
           },
-        );
+        },
+      );
 
-        if (!response.ok) {
-          let message = "Failed to fetch adoption detail.";
+      if (!response.ok) {
+        let message = "Failed to fetch adoption detail.";
+        try {
+          const errorBody = await response.json();
+          message = errorBody?.message ?? message;
+        } catch {
           try {
-            const errorBody = await response.json();
-            message = errorBody?.message ?? message;
+            const errorText = await response.text();
+            if (errorText) message = errorText;
           } catch {
-            try {
-              const errorText = await response.text();
-              if (errorText) message = errorText;
-            } catch {
-              // Keep fallback message.
-            }
+            // Keep fallback message.
           }
-          throw new Error(message);
         }
-
-        const data = (await response.json()) as AdoptionDetailResponse;
-        if (!data?.data) {
-          throw new Error("Invalid adoption detail response.");
-        }
-        if (isMounted) {
-          setPetData(data.data);
-          setStatus("idle");
-        }
-      } catch (err) {
-        if (isMounted) {
-          setStatus("failed");
-          setError(
-            err instanceof Error
-              ? err.message
-              : "Failed to fetch adoption detail.",
-          );
-        }
+        throw new Error(message);
       }
-    };
 
+      const data = (await response.json()) as AdoptionDetailResponse;
+      if (!data?.data) {
+        throw new Error("Invalid adoption detail response.");
+      }
+      setPetData(data.data);
+      setStatus("idle");
+      return true;
+    } catch (err) {
+      setStatus("failed");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to fetch adoption detail.",
+      );
+      return false;
+    }
+  }, [accessToken, normalizedBaseUrl, params?.id]);
+
+  useEffect(() => {
+    if (!params?.id) return;
     fetchDetail();
-    return () => {
-      isMounted = false;
-    };
-  }, [accessToken, normalizedBaseUrl, params]);
+  }, [fetchDetail, params?.id]);
 
   const recordData = useMemo(() => {
     if (!petData?.healthRecords?.length) return [];
@@ -210,17 +213,30 @@ export default function ViewPetPage() {
       name: record.name || record.type || "Record",
       updatedAt: record.updatedAt || "N/A",
       reminder: record.reminder || "No reminder",
-      attachments: (record.attachments ?? []).map((attachment, attachmentIndex) => {
-        const url = attachment.url || "";
-        const name = attachment.name || getFileName(url);
-        return {
-          id: attachment.id || `${index}-${attachmentIndex}`,
-          name,
-          type: attachment.type || getAttachmentType(name),
-          url,
-          size: attachment.size || "N/A",
-        };
-      }),
+      attachments: (record.attachments ?? []).map(
+        (attachment: RecordAttachment | string, attachmentIndex) => {
+          if (typeof attachment === "string") {
+            const url = attachment;
+            const name = getFileName(url);
+            return {
+              id: `${index}-${attachmentIndex}`,
+              name,
+              type: getAttachmentType(name),
+              url,
+              size: "N/A",
+            };
+          }
+          const url = attachment.url || "";
+          const name = attachment.name || getFileName(url);
+          return {
+            id: attachment.id || `${index}-${attachmentIndex}`,
+            name,
+            type: attachment.type || getAttachmentType(name),
+            url,
+            size: attachment.size || "N/A",
+          };
+        },
+      ),
     }));
   }, [petData]);
 
@@ -250,6 +266,107 @@ export default function ViewPetPage() {
       }));
   }, [viewType, recordData]);
 
+  const handleAddRecord = async (record: HealthRecordFormValues) => {
+    const listingId = params?.id;
+    if (!listingId) {
+      setAddRecordError("Missing listing id.");
+      setAddRecordStatus("failed");
+      return;
+    }
+    if (!normalizedBaseUrl) {
+      setAddRecordError("NEXT_PUBLIC_API_BASE_URL is not set.");
+      setAddRecordStatus("failed");
+      return;
+    }
+    if (!accessToken) {
+      setAddRecordError("Missing access token.");
+      setAddRecordStatus("failed");
+      return;
+    }
+
+    setAddRecordStatus("loading");
+    setAddRecordError(null);
+    setAddRecordOpen(false);
+    try {
+      const healthPayload = new FormData();
+      healthPayload.append("type", record.type);
+      healthPayload.append(
+        "recordDetails",
+        JSON.stringify({
+          recordName: record.recordName,
+          batchLotNo: record.batchNumber,
+          otherInfo: record.otherInfo,
+        }),
+      );
+      healthPayload.append(
+        "veterinarian",
+        JSON.stringify({
+          designation: record.vetDesignation,
+          name: record.vetName,
+          clinicName: record.clinicName,
+          licenseNo: record.licenseNumber,
+          contact: record.contact,
+        }),
+      );
+      healthPayload.append(
+        "vitalSigns",
+        JSON.stringify({
+          weight: record.weight,
+          temperature: record.temperature,
+          heartRate: record.heartRate,
+          respiratory: record.respiratory,
+          status: record.status,
+        }),
+      );
+      healthPayload.append(
+        "observation",
+        JSON.stringify({
+          lookupObservations: [],
+          clinicalNotes: "",
+        }),
+      );
+      record.attachments.forEach((file) => {
+        healthPayload.append("files", file);
+      });
+
+      const healthResponse = await fetch(
+        `${normalizedBaseUrl}/admin/adoptions/${listingId}/health-records`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: healthPayload,
+        },
+      );
+
+      if (!healthResponse.ok) {
+        let message = `Failed to add ${record.type} health record.`;
+        try {
+          const errorBody = await healthResponse.json();
+          message = errorBody?.message ?? message;
+        } catch {
+          try {
+            const errorText = await healthResponse.text();
+            if (errorText) message = errorText;
+          } catch {
+            // Keep fallback message.
+          }
+        }
+        throw new Error(message);
+      }
+
+      setAddRecordStatus("idle");
+      setAddRecordOpen(false);
+      await fetchDetail();
+    } catch (err) {
+      setAddRecordStatus("failed");
+      setAddRecordError(
+        err instanceof Error ? err.message : "Failed to add health record.",
+      );
+    }
+  };
+
   const petName = petData?.petName ?? petData?.title ?? "Pet";
   const petAge = petData?.age;
   const personality = petData?.personality?.length
@@ -271,7 +388,10 @@ export default function ViewPetPage() {
           </p>
         </div>
 
-        <button className="px-4 py-2 bg-[#D6F2F8] hover:bg-[#c9edf5] rounded-lg flex items-center gap-2 text-gray-800">
+        <button
+          onClick={() => router.push(`/dashboard/adoption-list/${params.id}`)}
+          className="px-4 py-2 bg-[#D6F2F8] hover:bg-[#c9edf5] rounded-lg flex items-center gap-2 text-gray-800"
+        >
           <svg
             width="18"
             height="18"
@@ -424,11 +544,27 @@ export default function ViewPetPage() {
 
       {/* HEALTH RECORDS */}
       <div className="mt-12">
-        <h3 className="text-lg font-semibold text-gray-900">Health Records</h3>
-        <p className="text-sm text-gray-600 mt-1">
-          All the health records are recorded here. You can pick individual to
-          view that file.
-        </p>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">
+              Health Records
+            </h3>
+            <p className="text-sm text-gray-600 mt-1">
+              All the health records are recorded here. You can pick individual
+              to view that file.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setAddRecordError(null);
+              setAddRecordOpen(true);
+            }}
+            className="px-4 py-2 bg-[#D6F2F8] hover:bg-[#c9edf5] rounded-xl text-gray-800 font-medium"
+          >
+            Add Health Record
+          </button>
+        </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-5">
           {healthRecordTypes.map((recordType) => {
@@ -465,6 +601,11 @@ export default function ViewPetPage() {
             );
           })}
         </div>
+        {addRecordError ? (
+          <p className="text-xs text-red-500 mt-3" role="alert">
+            {addRecordError}
+          </p>
+        ) : null}
       </div>
 
       <HealthRecordsModal
@@ -473,6 +614,17 @@ export default function ViewPetPage() {
         records={recordsForView}
         onClose={() => setViewType(null)}
       />
+
+      {addRecordOpen && (
+        <RecordTypeModal
+          open={addRecordOpen}
+          onClose={() => {
+            if (addRecordStatus === "loading") return;
+            setAddRecordOpen(false);
+          }}
+          onSave={handleAddRecord}
+        />
+      )}
     </div>
   );
 }

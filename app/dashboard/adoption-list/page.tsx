@@ -11,6 +11,10 @@ export default function AdoptionManagementPage() {
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [deleteStatus, setDeleteStatus] = useState<
+    "idle" | "loading" | "failed"
+  >("idle");
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
@@ -19,6 +23,9 @@ export default function AdoptionManagementPage() {
   const items = useAppSelector((state) => state.adoption.items);
   const status = useAppSelector((state) => state.adoption.status);
   const error = useAppSelector((state) => state.adoption.error);
+  const accessToken = useAppSelector((state) => state.auth.tokens?.accessToken);
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+  const normalizedBaseUrl = baseUrl ? baseUrl.replace(/\/+$/, "") : "";
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -57,9 +64,59 @@ export default function AdoptionManagementPage() {
     setMenuOpenId(null);
   };
 
-  const confirmDelete = () => {
-    console.log("Deleting pet with ID:", selectedId);
-    setDeleteOpen(false);
+  const confirmDelete = async () => {
+    if (!selectedId) return;
+    if (!normalizedBaseUrl) {
+      setDeleteError("NEXT_PUBLIC_API_BASE_URL is not set.");
+      return;
+    }
+    if (!accessToken) {
+      setDeleteError("Missing access token.");
+      return;
+    }
+
+    setDeleteStatus("loading");
+    setDeleteError(null);
+    try {
+      const response = await fetch(
+        `${normalizedBaseUrl}/admin/adoptions/${selectedId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        let message = "Failed to delete adoption listing.";
+        try {
+          const errorBody = await response.json();
+          message = errorBody?.message ?? message;
+        } catch {
+          try {
+            const errorText = await response.text();
+            if (errorText) message = errorText;
+          } catch {
+            // Keep fallback message.
+          }
+        }
+        throw new Error(message);
+      }
+
+      setDeleteStatus("idle");
+      setDeleteOpen(false);
+      setSelectedId(null);
+      dispatch(fetchAdoptionSummary({ page, limit: pageSize }));
+    } catch (err) {
+      setDeleteStatus("failed");
+      setDeleteError(
+        err instanceof Error
+          ? err.message
+          : "Failed to delete adoption listing.",
+      );
+    }
   };
 
   return (
@@ -193,7 +250,7 @@ export default function AdoptionManagementPage() {
                         <button
                           className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-50"
                           onClick={() =>
-                            router.push("/dashboard/adoption-list/edit")
+                            router.push(`/dashboard/adoption-list/${item.id}`)
                           }
                         >
                           Edit
@@ -218,6 +275,10 @@ export default function AdoptionManagementPage() {
       <p className="text-sm text-gray-600">
         No of Results {items.length} out of {items.length}
       </p>
+
+      {deleteError ? (
+        <p className="text-xs text-red-600">{deleteError}</p>
+      ) : null}
 
       {/* PAGINATION */}
       <div className="flex items-center gap-2">
@@ -260,6 +321,7 @@ export default function AdoptionManagementPage() {
           onConfirm={confirmDelete}
           title="Delete Adoption Record?"
           description="Deleting this pet will remove it from adoption list permanently."
+          loading={deleteStatus === "loading"}
         />
       )}
     </div>

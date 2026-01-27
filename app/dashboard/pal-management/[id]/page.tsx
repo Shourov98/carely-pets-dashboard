@@ -87,11 +87,6 @@ export default function PetOwnerDetails() {
             This section will show every details of a particular user.
           </p>
         </div>
-
-        <button className="flex items-center gap-2 px-5 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">
-          <Trash2 className="h-4 w-4" />
-          Delete
-        </button>
       </div>
 
       {/* ---- TABS ---- */}

@@ -7,8 +7,6 @@ import { GenderRow } from "./GenderRow";
 import { TrainingRow } from "./TrainingRow";
 import { VaccinationRow } from "./VaccinationRow";
 import { NeuteredRow } from "./NeuteredRow";
-import HealthRecordsSection from "./HealthRecordsSection";
-import { HealthRecordFormValues } from "./HealthRecordFormModal";
 import { useAppSelector } from "../../../store/hooks";
 
 export default function AddPetForAdoption() {
@@ -19,9 +17,6 @@ export default function AddPetForAdoption() {
   const [snapError, setSnapError] = useState<string | null>(null);
   const [traits, setTraits] = useState<string[]>([]);
   const [traitInput, setTraitInput] = useState("");
-  const [healthRecords, setHealthRecords] = useState<HealthRecordFormValues[]>(
-    [],
-  );
   const [submitStatus, setSubmitStatus] = useState<
     "idle" | "loading" | "succeeded" | "failed"
   >("idle");
@@ -153,25 +148,6 @@ export default function AddPetForAdoption() {
       createSampleImageFile("pet-snap-1.png"),
       createSampleImageFile("pet-snap-2.png"),
     ]);
-    setHealthRecords([
-      {
-        type: "Vaccination",
-        recordName: "Rabies shot",
-        batchNumber: "RB-102",
-        otherInfo: "Annual vaccination",
-        vetDesignation: "DVM",
-        vetName: "Dr. Patel",
-        clinicName: "Northside Vet",
-        licenseNumber: "LIC-00982",
-        contact: "555-321-4422",
-        weight: "18 lbs",
-        temperature: "101.2 F",
-        heartRate: "90 bpm",
-        respiratory: "18 bpm",
-        status: "Normal",
-        attachments: [createSampleImageFile("health-record-1.png")],
-      },
-    ]);
     setSnapError(null);
     setSubmitError(null);
   };
@@ -186,26 +162,6 @@ export default function AddPetForAdoption() {
     }
     if (snaps.some((file) => file.size > maxFileSizeBytes)) {
       setSubmitError("Each snap must be 15MB or less.");
-      return;
-    }
-
-    const invalidRecord = healthRecords.find(
-      (record) =>
-        record.attachments.length < 1 || record.attachments.length > 3,
-    );
-    if (invalidRecord) {
-      setSubmitError(
-        `Health record "${invalidRecord.type}" must include 1-3 attachments.`,
-      );
-      return;
-    }
-    const oversizeRecord = healthRecords.find((record) =>
-      record.attachments.some((file) => file.size > maxFileSizeBytes),
-    );
-    if (oversizeRecord) {
-      setSubmitError(
-        `Health record "${oversizeRecord.type}" has files over 15MB.`,
-      );
       return;
     }
 
@@ -274,8 +230,6 @@ export default function AddPetForAdoption() {
     payload.append("avatarIndex", "1");
 
     snaps.forEach((file) => payload.append("photos", file));
-    // Only send healthRecords if explicitly needed by the backend.
-    // For now, omit them to match the minimal payload shown in Postman.
     setSubmitStatus("loading");
     setSubmitError(null);
 
@@ -320,31 +274,30 @@ export default function AddPetForAdoption() {
         body: payload,
       });
 
-      if (response.ok) {
-        setSubmitStatus("succeeded");
-        setSnaps([]);
-        setTraits([]);
-        setTraitInput("");
-        setHealthRecords([]);
-        event.currentTarget.reset();
-        router.back();
-        window.setTimeout(() => window.location.reload(), 100);
-        return;
+      if (!response.ok) {
+        let message = "Failed to add pet for adoption.";
+        try {
+          const errorBody = await response.json();
+          message = errorBody?.message ?? message;
+        } catch {
+          try {
+            const errorText = await response.text();
+            if (errorText) message = errorText;
+          } catch {
+            // Keep fallback message.
+          }
+        }
+        throw new Error(message);
       }
 
-      let message = "Failed to add pet for adoption.";
-      try {
-        const errorBody = await response.json();
-        message = errorBody?.message ?? message;
-      } catch {
-        try {
-          const errorText = await response.text();
-          if (errorText) message = errorText;
-        } catch {
-          // Keep fallback message.
-        }
-      }
-      throw new Error(message);
+      setSubmitStatus("succeeded");
+      setSnaps([]);
+      setTraits([]);
+      setTraitInput("");
+      event.currentTarget.reset();
+      router.back();
+      window.setTimeout(() => window.location.reload(), 100);
+      return;
     } catch (err) {
       setSubmitStatus("failed");
       setSubmitError(
@@ -551,12 +504,6 @@ export default function AddPetForAdoption() {
           </div>
         )}
       </div>
-
-      {/* ------------------- HEALTH RECORDS ------------------- */}
-      <HealthRecordsSection
-        records={healthRecords}
-        onAddRecord={(record) => setHealthRecords((prev) => [...prev, record])}
-      />
 
       {/* ACTION BUTTONS */}
       <div className="flex justify-end gap-4">

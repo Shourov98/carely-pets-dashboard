@@ -8,7 +8,6 @@ import { GenderRow } from "../add/GenderRow";
 import { TrainingRow } from "../add/TrainingRow";
 import { VaccinationRow } from "../add/VaccinationRow";
 import { NeuteredRow } from "../add/NeuteredRow";
-import HealthRecordsSection from "../add/HealthRecordsSection";
 
 const initialSnaps = [
   { id: 1, name: "bubby-front.jpg", size: "245KB" },
@@ -238,12 +237,6 @@ export default function EditPetForAdoption() {
         )}
       </div>
 
-      {/* ------------------- HEALTH RECORDS ------------------- */}
-      <HealthRecordsSection
-        title="Health Records"
-        description="Review existing records or add new health data for this pet."
-        actionLabel="Add Health Record"
-      />
 
       {/* ACTION BUTTONS */}
       <div className="flex justify-end gap-4">
