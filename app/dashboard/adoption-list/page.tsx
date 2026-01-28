@@ -150,6 +150,7 @@ export default function AdoptionManagementPage() {
             <tr>
               {[
                 "NO.",
+                "Pet Name",
                 "Pet Type",
                 "Pet Breed",
                 "Pet Age",
@@ -170,7 +171,7 @@ export default function AdoptionManagementPage() {
             {status === "loading" ? (
               <tr className="border-t">
                 <td
-                  colSpan={6}
+                  colSpan={7}
                   className="py-6 px-5 text-center text-gray-600"
                 >
                   Loading adoption list...
@@ -179,7 +180,7 @@ export default function AdoptionManagementPage() {
             ) : status === "failed" ? (
               <tr className="border-t">
                 <td
-                  colSpan={6}
+                  colSpan={7}
                   className="py-6 px-5 text-center text-red-600"
                 >
                   {error ?? "Failed to load adoption list."}
@@ -188,7 +189,7 @@ export default function AdoptionManagementPage() {
             ) : pagedItems.length === 0 ? (
               <tr className="border-t">
                 <td
-                  colSpan={6}
+                  colSpan={7}
                   className="py-6 px-5 text-center text-gray-600"
                 >
                   No pets found.
@@ -200,6 +201,7 @@ export default function AdoptionManagementPage() {
                   <td className="py-4 px-5 text-gray-700">
                     {(currentPage - 1) * pageSize + index + 1}
                   </td>
+                  <td className="py-4 px-5 text-gray-900">{item.petName}</td>
                   <td className="py-4 px-5 text-gray-900">{item.petType}</td>
                   <td className="py-4 px-5 text-gray-700">{item.petBreed}</td>
                   <td className="py-4 px-5 text-gray-700">

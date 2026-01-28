@@ -128,6 +128,7 @@ export default function AddPetForAdoption() {
     setValue("breed", breed);
     setValue("petAge", `${Math.floor(Math.random() * 10) + 1}`);
     setValue("weightLbs", `${Math.floor(Math.random() * 60) + 5}`);
+    setValue("price", `${Math.floor(Math.random() * 500) + 50}`);
     setValue(
       "aboutPet",
       `${petName} is a ${personality.join(", ")} ${petType.toLowerCase()}.`,
@@ -184,6 +185,7 @@ export default function AddPetForAdoption() {
     const breed = getValue("breed").trim();
     const petAge = getValue("petAge").trim();
     const weightLbs = getValue("weightLbs").trim();
+    const price = getValue("price").trim();
     const gender = getValue("gender").trim();
     const trained = getValue("trained").trim();
     const vaccinated = getValue("vaccinated").trim();
@@ -198,6 +200,7 @@ export default function AddPetForAdoption() {
     if (!breed) missingFields.push("breed");
     if (!petAge) missingFields.push("pet age");
     if (!weightLbs) missingFields.push("weight");
+    if (!price) missingFields.push("price");
     if (!gender) missingFields.push("gender");
     if (!trained) missingFields.push("trained");
     if (!vaccinated) missingFields.push("vaccinated");
@@ -219,6 +222,7 @@ export default function AddPetForAdoption() {
     payload.append("breed", breed);
     payload.append("petAge", petAge);
     payload.append("weightLbs", weightLbs);
+    payload.append("price", price);
     payload.append("gender", gender);
     payload.append("trained", trained);
     payload.append("vaccinated", vaccinated);
@@ -414,13 +418,14 @@ export default function AddPetForAdoption() {
               dropdown
             />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <InputField label="YEAR" name="petAge" placeholder="Pet age" />
               <InputField
                 label="WEIGHT (lbs)"
                 name="weightLbs"
                 placeholder="Pet weight"
               />
+              <InputField label="PRICE" name="price" placeholder="Pet price" />
             </div>
 
             <GenderRow />
