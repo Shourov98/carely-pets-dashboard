@@ -13,7 +13,7 @@ const tabs = ["Profile", "Pets", "Service"];
 export default function PetOwnerDetails() {
   const { id } = useParams();
   const [activeTab, setActiveTab] = useState("Profile");
-  const [openAccordion, setOpenAccordion] = useState<number | null>(null);
+  const [openAccordion, setOpenAccordion] = useState<string | null>(null);
   const accessToken = useAppSelector((state) => state.auth.tokens?.accessToken);
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
   const normalizedBaseUrl = baseUrl ? baseUrl.replace(/\/+$/, "") : "";
@@ -59,11 +59,42 @@ export default function PetOwnerDetails() {
   }
 
   interface UserService {
-    id: number;
-    service: string;
-    date: string;
-    price: string;
-    status: string;
+    id: string;
+    customer?: {
+      name?: string | null;
+      phone?: string | null;
+    } | null;
+    service?: {
+      serviceName?: string | null;
+      dateTime?: string | null;
+      providerName?: string | null;
+      status?: string | null;
+    } | null;
+    pet?: {
+      name?: string | null;
+      type?: string | null;
+      breed?: string | null;
+      age?: number | null;
+      ageLabel?: string | null;
+    } | null;
+    orderSummary?: {
+      serviceName?: string | null;
+      petName?: string | null;
+      servicePrice?: number | null;
+      items?: Array<{
+        serviceName?: string | null;
+        petName?: string | null;
+        price?: number | null;
+      }> | null;
+    } | null;
+    payment?: {
+      subtotal?: number | null;
+      taxPercent?: number | null;
+      total?: number | null;
+      status?: string | null;
+    } | null;
+    createdAt?: string | null;
+    updatedAt?: string | null;
   }
 
   useEffect(() => {
@@ -378,170 +409,221 @@ export default function PetOwnerDetails() {
       {/* ---- SERVICE TAB ---- */}
       {activeTab === "Service" && (
         <div className="space-y-4">
-          {services.map((s) => {
-            const isOpen = openAccordion === s.id;
+          {status === "loading" ? (
+            <div className="bg-white border rounded-xl p-6 text-gray-600">
+              Loading services...
+            </div>
+          ) : status === "failed" ? (
+            <div className="bg-white border rounded-xl p-6 text-red-600">
+              {error ?? "Failed to load services."}
+            </div>
+          ) : services.length === 0 ? (
+            <div className="bg-white border rounded-xl p-6 text-gray-600">
+              No services found.
+            </div>
+          ) : (
+            services.map((s) => {
+              const isOpen = openAccordion === s.id;
+              const serviceName = s.service?.serviceName ?? "N/A";
+              const serviceDate = s.service?.dateTime
+                ? new Date(s.service.dateTime).toLocaleString()
+                : "N/A";
+              const providerName = s.service?.providerName ?? "N/A";
+              const serviceStatus = s.service?.status ?? "N/A";
+              const paymentStatus = s.payment?.status ?? "N/A";
+              const statusLabel = serviceStatus.toString().toUpperCase();
+              const isPending = serviceStatus?.toLowerCase() === "pending";
+              const displayTotal =
+                typeof s.payment?.total === "number"
+                  ? `$${s.payment.total.toFixed(2)}`
+                  : "N/A";
+              const displaySubtotal =
+                typeof s.payment?.subtotal === "number"
+                  ? `$${s.payment.subtotal.toFixed(2)}`
+                  : "N/A";
+              const taxPercent =
+                typeof s.payment?.taxPercent === "number"
+                  ? s.payment.taxPercent
+                  : 0;
+              const taxAmount =
+                typeof s.payment?.subtotal === "number"
+                  ? (s.payment.subtotal * taxPercent) / 100
+                  : 0;
 
-            return (
-              <div
-                key={s.id}
-                className="bg-white border rounded-xl shadow-sm overflow-hidden"
-              >
-                {/* Accordion Header */}
-                <button
-                  onClick={() => setOpenAccordion(isOpen ? null : s.id)}
-                  className="w-full flex justify-between items-center px-5 py-4 text-left"
-                >
-                  <div>
-                    <p className="text-sm text-gray-500 font-medium">
-                      {s.service}
-                    </p>
-                    <p className="text-lg text-gray-800 font-semibold">
-                      {s.price}
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs flex items-center gap-2 ${
-                        s.status === "Processing"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : "bg-green-100 text-green-700"
-                      }`}
-                    >
-                      {s.status}
-                      <span
-                        className={`h-2 w-2 rounded-full ${
-                          s.status === "Processing"
-                            ? "bg-yellow-500"
-                            : "bg-green-500"
-                        }`}
-                      />
-                    </span>
-
-                    <ChevronDown
-                      className={`h-5 w-5 text-gray-600 transition-transform ${
-                        isOpen ? "rotate-180" : ""
-                      }`}
-                    />
-                  </div>
-                </button>
-
-                {/* Accordion Content */}
+              return (
                 <div
-                  className={`transition-all duration-300 ${
-                    isOpen ? "max-h-[2000px] py-6" : "max-h-0"
-                  } overflow-hidden px-5`}
+                  key={s.id}
+                  className="bg-white border rounded-xl shadow-sm overflow-hidden"
                 >
-                  {/* SERVICE ID */}
-                  <div className="mb-5">
-                    <p className="text-xs text-gray-500 font-semibold">
-                      SERVICE ID
-                    </p>
-                    <p className="text-gray-800 font-medium">{s.id}</p>
-                  </div>
-
-                  {/* CUSTOMER INFO */}
-                  <div className="p-5 border rounded-xl mb-6">
-                    <div className="flex justify-between items-center mb-4">
-                      <p className="text-gray-800 font-semibold">
-                        Customer Information
+                  {/* Accordion Header */}
+                  <button
+                    onClick={() => setOpenAccordion(isOpen ? null : s.id)}
+                    className="w-full flex justify-between items-center px-5 py-4 text-left"
+                  >
+                    <div>
+                      <p className="text-sm text-gray-500 font-medium">
+                        {serviceName}
                       </p>
+                      <p className="text-lg text-gray-800 font-semibold">
+                        {displayTotal}
+                      </p>
+                    </div>
 
+                    <div className="flex items-center gap-3">
                       <span
                         className={`px-3 py-1 rounded-full text-xs flex items-center gap-2 ${
-                          s.status === "Processing"
+                          isPending
                             ? "bg-yellow-100 text-yellow-700"
                             : "bg-green-100 text-green-700"
                         }`}
                       >
-                        {s.status}
+                        {statusLabel}
                         <span
                           className={`h-2 w-2 rounded-full ${
-                            s.status === "Processing"
-                              ? "bg-yellow-500"
-                              : "bg-green-500"
+                            isPending ? "bg-yellow-500" : "bg-green-500"
                           }`}
                         />
                       </span>
+
+                      <ChevronDown
+                        className={`h-5 w-5 text-gray-600 transition-transform ${
+                          isOpen ? "rotate-180" : ""
+                        }`}
+                      />
+                    </div>
+                  </button>
+
+                  {/* Accordion Content */}
+                  <div
+                    className={`transition-all duration-300 ${
+                      isOpen ? "max-h-[2000px] py-6" : "max-h-0"
+                    } overflow-hidden px-5`}
+                  >
+                    {/* SERVICE ID */}
+                    <div className="mb-5">
+                      <p className="text-xs text-gray-500 font-semibold">
+                        SERVICE ID
+                      </p>
+                      <p className="text-gray-800 font-medium">{s.id}</p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <p className="text-xs text-gray-500 font-medium">
-                          NAME
+                    {/* CUSTOMER INFO */}
+                    <div className="p-5 border rounded-xl mb-6">
+                      <div className="flex justify-between items-center mb-4">
+                        <p className="text-gray-800 font-semibold">
+                          Customer Information
                         </p>
-                        <p className="text-gray-800 font-medium">John Doe</p>
+
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs flex items-center gap-2 ${
+                            isPending
+                              ? "bg-yellow-100 text-yellow-700"
+                              : "bg-green-100 text-green-700"
+                          }`}
+                        >
+                          {statusLabel}
+                          <span
+                            className={`h-2 w-2 rounded-full ${
+                              isPending ? "bg-yellow-500" : "bg-green-500"
+                            }`}
+                          />
+                        </span>
                       </div>
 
-                      <div>
-                        <p className="text-xs text-gray-500 font-medium">
-                          PHONE
-                        </p>
-                        <p className="text-gray-800 font-medium">
-                          555 666 8898
-                        </p>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                          <p className="text-xs text-gray-500 font-medium">
+                            NAME
+                          </p>
+                          <p className="text-gray-800 font-medium">
+                            {s.customer?.name ?? "N/A"}
+                          </p>
+                        </div>
+
+                        <div>
+                          <p className="text-xs text-gray-500 font-medium">
+                            PHONE
+                          </p>
+                          <p className="text-gray-800 font-medium">
+                            {s.customer?.phone ?? "N/A"}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* SERVICE DETAILS */}
-                  <div className="p-5 border rounded-xl mb-6 space-y-5">
-                    <DetailRow
-                      label="SERVICE"
-                      value={s.service}
-                      icon="/icons/service.svg"
-                    />
-                    <DetailRow
-                      label="DATE & TIME"
-                      value={s.date}
-                      icon="/icons/calendar.svg"
-                    />
-                    <DetailRow
-                      label="WITH"
-                      value="Carely Pets"
-                      icon="/icons/location.svg"
-                    />
-                    <DetailRow
-                      label="FOR"
-                      value="Bubby"
-                      icon="/icons/paw.svg"
-                    />
-                  </div>
+                    {/* SERVICE DETAILS */}
+                    <div className="p-5 border rounded-xl mb-6 space-y-5">
+                      <DetailRow
+                        label="SERVICE"
+                        value={serviceName}
+                        icon="/icons/service.svg"
+                      />
+                      <DetailRow
+                        label="DATE & TIME"
+                        value={serviceDate}
+                        icon="/icons/calendar.svg"
+                      />
+                      <DetailRow
+                        label="WITH"
+                        value={providerName}
+                        icon="/icons/location.svg"
+                      />
+                      <DetailRow
+                        label="FOR"
+                        value={s.pet?.name ?? "N/A"}
+                        icon="/icons/paw.svg"
+                      />
+                    </div>
 
-                  {/* ORDER SUMMARY */}
-                  <div className="p-5 border rounded-xl">
-                    <p className="text-gray-800 font-semibold mb-4">
-                      Order Summary
-                    </p>
+                    {/* ORDER SUMMARY */}
+                    <div className="p-5 border rounded-xl">
+                      <p className="text-gray-800 font-semibold mb-4">
+                        Order Summary
+                      </p>
 
-                    <div className="space-y-2 text-gray-700">
-                      <div className="flex justify-between">
-                        <span>Grooming</span>
-                        <span>{s.price}</span>
-                      </div>
+                      <div className="space-y-2 text-gray-700">
+                        {(s.orderSummary?.items ?? []).map((item, index) => (
+                          <div key={index} className="flex justify-between">
+                            <span>{item.serviceName ?? "N/A"}</span>
+                            <span>
+                              {typeof item.price === "number"
+                                ? `$${item.price.toFixed(2)}`
+                                : "N/A"}
+                            </span>
+                          </div>
+                        ))}
 
-                      <div className="flex justify-between">
-                        <span>Subtotal</span>
-                        <span>{s.price}</span>
-                      </div>
+                        <div className="flex justify-between">
+                          <span>Subtotal</span>
+                          <span>{displaySubtotal}</span>
+                        </div>
 
-                      <div className="flex justify-between">
-                        <span>Tax (5%)</span>
-                        <span>$12.50</span>
-                      </div>
+                        <div className="flex justify-between">
+                          <span>Tax ({taxPercent}%)</span>
+                          <span>
+                            {typeof taxAmount === "number"
+                              ? `$${taxAmount.toFixed(2)}`
+                              : "N/A"}
+                          </span>
+                        </div>
 
-                      <hr className="my-3" />
+                        <hr className="my-3" />
 
-                      <div className="flex justify-between font-semibold text-gray-800">
-                        <span>Total</span>
-                        <span>$237.50</span>
+                        <div className="flex justify-between font-semibold text-gray-800">
+                          <span>Total</span>
+                          <span>{displayTotal}</span>
+                        </div>
+                        <div className="flex justify-between text-sm text-gray-500">
+                          <span>Payment Status</span>
+                          <span>{paymentStatus}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
       )}
     </div>
