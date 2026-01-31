@@ -6,7 +6,7 @@ import ConfirmModal from "./ConfirmModal";
 import ActionMenu from "./ActionMenu";
 import { useAppSelector } from "../../store/hooks";
 
-type ActionType = "delete" | "remove" | "warn";
+type ActionType = "delete" | "remove" | "warn" | "dismiss";
 
 interface SelectedReportState {
   type: ActionType;
@@ -68,6 +68,10 @@ export default function ReportPage() {
     warn: {
       title: "Warn this user?",
       desc: "A warning will be sent to the user for this reported content.",
+    },
+    dismiss: {
+      title: "Dismiss this report?",
+      desc: "This report will be marked as dismissed.",
     },
   };
 
@@ -176,12 +180,15 @@ export default function ReportPage() {
     try {
       const isRemove = selectedReport.type === "remove";
       const isWarn = selectedReport.type === "warn";
+      const isDismiss = selectedReport.type === "dismiss";
       const endpoint = isRemove
         ? `${normalizedBaseUrl}/admin/reports/${selectedReport.id}/remove-content`
         : isWarn
           ? `${normalizedBaseUrl}/admin/reports/${selectedReport.id}/warn`
+          : isDismiss
+            ? `${normalizedBaseUrl}/admin/reports/${selectedReport.id}/dismiss`
           : `${normalizedBaseUrl}/admin/reports/${selectedReport.id}`;
-      const method = isRemove || isWarn ? "POST" : "DELETE";
+      const method = isRemove || isWarn || isDismiss ? "POST" : "DELETE";
       const response = await fetch(endpoint, {
         method,
         headers: {
@@ -195,7 +202,9 @@ export default function ReportPage() {
           ? "Failed to remove content."
           : isWarn
             ? "Failed to warn user."
-            : "Failed to delete report.";
+            : isDismiss
+              ? "Failed to dismiss report."
+              : "Failed to delete report.";
         try {
           const errorBody = await response.json();
           message = errorBody?.message ?? message;
@@ -210,7 +219,7 @@ export default function ReportPage() {
         throw new Error(message);
       }
 
-      if (isRemove || isWarn) {
+      if (isRemove || isWarn || isDismiss) {
         let nextStatus: string | null = null;
         try {
           const body = await response.json();

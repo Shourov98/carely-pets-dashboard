@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 
-type ActionType = "delete" | "remove" | "warn";
+type ActionType = "delete" | "remove" | "warn" | "dismiss";
 
 interface ActionMenuProps {
   reportId: string;
@@ -74,7 +74,10 @@ export default function ActionMenu({
             Warn User
           </button>
 
-          <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+          <button
+            onClick={() => onDeleteClick("dismiss", reportId)}
+            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+          >
             Dismiss Report
           </button>
         </div>

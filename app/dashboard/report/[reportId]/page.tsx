@@ -135,7 +135,7 @@ export default function ReportDetailsPage() {
   const [error, setError] = useState<string | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteAction, setDeleteAction] = useState<
-    "delete" | "remove" | "warn"
+    "delete" | "remove" | "warn" | "dismiss"
   >("delete");
   const [deleteStatus, setDeleteStatus] = useState<
     "idle" | "loading" | "failed"
@@ -427,6 +427,76 @@ export default function ReportDetailsPage() {
     }
   };
 
+  const handleDismissReport = async () => {
+    if (!reportId) return;
+    if (!normalizedBaseUrl) {
+      setDeleteError("NEXT_PUBLIC_API_BASE_URL is not set.");
+      setDeleteStatus("failed");
+      return;
+    }
+    if (!accessToken) {
+      setDeleteError("Missing access token.");
+      setDeleteStatus("failed");
+      return;
+    }
+
+    setDeleteStatus("loading");
+    setDeleteError(null);
+
+    try {
+      const response = await fetch(
+        `${normalizedBaseUrl}/admin/reports/${reportId}/dismiss`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        let message = "Failed to dismiss report.";
+        try {
+          const errorBody = await response.json();
+          message = errorBody?.message ?? message;
+        } catch {
+          try {
+            const errorText = await response.text();
+            if (errorText) message = errorText;
+          } catch {
+            // Keep fallback message.
+          }
+        }
+        throw new Error(message);
+      }
+
+      let nextStatus: string | null = null;
+      try {
+        const body = await response.json();
+        nextStatus = body?.data?.status ?? null;
+      } catch {
+        // Keep current status when response has no body.
+      }
+
+      setReport((prev) =>
+        prev
+          ? {
+              ...prev,
+              status: nextStatus ?? prev.status,
+            }
+          : prev,
+      );
+      setDeleteStatus("idle");
+      setDeleteOpen(false);
+    } catch (err) {
+      setDeleteStatus("failed");
+      setDeleteError(
+        err instanceof Error ? err.message : "Failed to dismiss report.",
+      );
+    }
+  };
+
   const contentText = useMemo(() => {
     if (!report?.contentText) return "";
     return report.contentText;
@@ -494,7 +564,15 @@ export default function ReportDetailsPage() {
               >
                 Warn User
               </button>
-              <button className="px-4 py-2 text-sm text-left w-full hover:bg-gray-50 text-gray-700">
+              <button
+                onClick={() => {
+                  setDeleteError(null);
+                  setDeleteAction("dismiss");
+                  setDeleteOpen(true);
+                  setActionOpen(false);
+                }}
+                className="px-4 py-2 text-sm text-left w-full hover:bg-gray-50 text-gray-700"
+              >
                 Dismiss
               </button>
             </div>
@@ -587,6 +665,8 @@ export default function ReportDetailsPage() {
               ? "Remove Content?"
               : deleteAction === "warn"
                 ? "Warn User?"
+                : deleteAction === "dismiss"
+                  ? "Dismiss Report?"
                 : "Delete Report?"
           }
           description={
@@ -594,6 +674,8 @@ export default function ReportDetailsPage() {
               ? "This will remove the reported content and update the report status."
               : deleteAction === "warn"
                 ? "A warning will be sent to the user for this reported content."
+                : deleteAction === "dismiss"
+                  ? "This report will be marked as dismissed."
                 : "Deleting this report will permanently remove it from the database."
           }
           onClose={() => {
@@ -605,6 +687,8 @@ export default function ReportDetailsPage() {
               ? handleRemoveContent
               : deleteAction === "warn"
                 ? handleWarnUser
+                : deleteAction === "dismiss"
+                  ? handleDismissReport
                 : handleDeleteReport
           }
           loading={deleteStatus === "loading"}
