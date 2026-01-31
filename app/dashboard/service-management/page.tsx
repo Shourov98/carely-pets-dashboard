@@ -1,92 +1,129 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ChevronDown, MoreHorizontal } from "lucide-react";
 import ConfirmModal from "../report/ConfirmModal";
 import { useRouter } from "next/navigation";
+import { useAppSelector } from "../../store/hooks";
 
 interface ServiceRequest {
-  id: number;
-  customer: string;
+  id: string;
+  customerName: string;
   serviceType: string;
   petType: string;
   petBreed: string;
   petAge: string;
-  status: "Pending" | "Completed";
+  status: "pending" | "completed" | string;
 }
 
 export default function ServiceManagementPage() {
   const router = useRouter();
 
-  // ----------------------------
-  // Dummy Data
-  // ----------------------------
-
-  const [data, setData] = useState<ServiceRequest[]>([
-    {
-      id: 1,
-      customer: "Courtney Henry",
-      serviceType: "Vet",
-      petType: "Dog",
-      petBreed: "Husky",
-      petAge: "1 year",
-      status: "Pending",
-    },
-    {
-      id: 2,
-      customer: "Guy Hawkins",
-      serviceType: "Grooming",
-      petType: "Cat",
-      petBreed: "Persian Cat",
-      petAge: "1 year",
-      status: "Completed",
-    },
-    {
-      id: 3,
-      customer: "Wade Warren",
-      serviceType: "Walking",
-      petType: "Dog",
-      petBreed: "Labrador Retriever",
-      petAge: "1 year",
-      status: "Pending",
-    },
-    {
-      id: 4,
-      customer: "Theresa Webb",
-      serviceType: "Training",
-      petType: "Bird",
-      petBreed: "Parrot",
-      petAge: "1 year",
-      status: "Pending",
-    },
-    {
-      id: 5,
-      customer: "Savannah Nguyen",
-      serviceType: "Grooming",
-      petType: "Exotic Pet",
-      petBreed: "Hermann's tortoise",
-      petAge: "1 year",
-      status: "Completed",
-    },
-  ]);
+  const [data, setData] = useState<ServiceRequest[]>([]);
+  const [status, setStatus] = useState<"idle" | "loading" | "failed">("idle");
+  const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const pageSize = 20;
+  const [total, setTotal] = useState(0);
 
   type StatusFilter = "All" | "Pending" | "Completed";
   const [selectedStatus, setSelectedStatus] = useState<StatusFilter>("All");
-  const [openMenu, setOpenMenu] = useState<number | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
-  const filteredData =
-    selectedStatus === "All"
-      ? data
-      : data.filter((item) => item.status === selectedStatus);
+  const accessToken = useAppSelector((state) => state.auth.tokens?.accessToken);
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+  const normalizedBaseUrl = baseUrl ? baseUrl.replace(/\/+$/, "") : "";
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      if (!normalizedBaseUrl) {
+        setError("NEXT_PUBLIC_API_BASE_URL is not set.");
+        setStatus("failed");
+        return;
+      }
+      if (!accessToken) {
+        setError("Missing access token.");
+        setStatus("failed");
+        return;
+      }
+
+      const statusParam = selectedStatus.toLowerCase();
+      setStatus("loading");
+      setError(null);
+
+      try {
+        const response = await fetch(
+          `${normalizedBaseUrl}/admin/services?status=${statusParam}&page=${page}&limit=${pageSize}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${accessToken}`,
+            },
+          },
+        );
+
+        if (!response.ok) {
+          let message = "Failed to fetch services.";
+          try {
+            const errorBody = await response.json();
+            message = errorBody?.message ?? message;
+          } catch {
+            try {
+              const errorText = await response.text();
+              if (errorText) message = errorText;
+            } catch {
+              // Keep fallback message.
+            }
+          }
+          throw new Error(message);
+        }
+
+        const body = await response.json();
+        const items = body?.data?.data;
+        const pagination = body?.data?.pagination;
+        if (!Array.isArray(items)) {
+          throw new Error("Invalid services response.");
+        }
+
+        setData(
+          items.map((item: ServiceRequest & { petAgeLabel?: string }) => ({
+            id: item.id ?? "",
+            customerName: item.customerName ?? "Unknown",
+            serviceType: item.serviceType ?? "-",
+            petType: item.petType ?? "-",
+            petBreed: item.petBreed ?? "-",
+            petAge: item.petAgeLabel ?? `${item.petAge ?? ""}`.trim(),
+            status: item.status ?? "pending",
+          })),
+        );
+        setTotal(typeof pagination?.total === "number" ? pagination.total : 0);
+        setStatus("idle");
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to fetch services.",
+        );
+        setStatus("failed");
+      }
+    };
+
+    fetchServices();
+  }, [accessToken, normalizedBaseUrl, page, pageSize, selectedStatus]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [selectedStatus]);
+
+  const filteredData = useMemo(() => data, [data]);
 
   // ------------------------
   // Actions
   // ------------------------
 
-  const updateStatus = (id: number, status: "Pending" | "Completed") => {
+  const updateStatus = (id: string, nextStatus: "pending" | "completed") => {
     setData((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, status } : item))
+      prev.map((item) => (item.id === id ? { ...item, status: nextStatus } : item)),
     );
     setOpenMenu(null);
   };
@@ -154,99 +191,141 @@ export default function ServiceManagementPage() {
           </thead>
 
           <tbody>
-            {filteredData.map((item, idx) => (
-              <tr key={item.id} className="border-t">
-                <td className="p-4 text-gray-700">{idx + 1}</td>
-                <td className="p-4 text-gray-800">{item.customer}</td>
-                <td className="p-4 text-gray-700">{item.serviceType}</td>
-                <td className="p-4 text-gray-700">{item.petType}</td>
-                <td className="p-4 text-gray-700">{item.petBreed}</td>
-                <td className="p-4 text-gray-700">{item.petAge}</td>
-
-                {/* STATUS BADGE */}
-                <td className="p-4">
-                  {item.status === "Pending" ? (
-                    <span className="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full flex items-center w-fit gap-2">
-                      Pending{" "}
-                      <span className="w-2 h-2 bg-yellow-500 rounded-full" />
-                    </span>
-                  ) : (
-                    <span className="px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full flex items-center w-fit gap-2">
-                      Completed{" "}
-                      <span className="w-2 h-2 bg-green-500 rounded-full" />
-                    </span>
-                  )}
-                </td>
-
-                {/* ACTION MENU */}
-                <td className="p-4 relative">
-                  <button
-                    onClick={() =>
-                      setOpenMenu(openMenu === item.id ? null : item.id)
-                    }
-                  >
-                    <MoreHorizontal className="h-5 w-5 text-gray-700" />
-                  </button>
-
-                  {openMenu === item.id && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white border shadow-lg rounded-xl z-20">
-                      <button
-                        onClick={() =>
-                          router.push(
-                            `/dashboard/service-management/${item.id}`
-                          )
-                        }
-                        className="w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
-                      >
-                        View
-                      </button>
-
-                      <button
-                        onClick={() => setDeleteTarget(item.id)}
-                        className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100"
-                      >
-                        Delete
-                      </button>
-
-                      <div className="border-t my-1"></div>
-
-                      <p className="px-4 pt-1 text-xs text-gray-500">ACTION</p>
-
-                      <button
-                        onClick={() => updateStatus(item.id, "Completed")}
-                        className="w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
-                      >
-                        Completed
-                      </button>
-
-                      <button
-                        onClick={() => updateStatus(item.id, "Pending")}
-                        className="w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
-                      >
-                        Not Completed
-                      </button>
-                    </div>
-                  )}
+            {status === "loading" ? (
+              <tr className="border-t">
+                <td colSpan={8} className="p-6 text-center text-gray-600">
+                  Loading services...
                 </td>
               </tr>
-            ))}
+            ) : status === "failed" ? (
+              <tr className="border-t">
+                <td colSpan={8} className="p-6 text-center text-red-600">
+                  {error ?? "Failed to load services."}
+                </td>
+              </tr>
+            ) : filteredData.length === 0 ? (
+              <tr className="border-t">
+                <td colSpan={8} className="p-6 text-center text-gray-600">
+                  No services found.
+                </td>
+              </tr>
+            ) : (
+              filteredData.map((item, idx) => {
+                const statusValue = item.status?.toLowerCase();
+                return (
+                  <tr key={item.id} className="border-t">
+                    <td className="p-4 text-gray-700">
+                      {(page - 1) * pageSize + idx + 1}
+                    </td>
+                    <td className="p-4 text-gray-800">{item.customerName}</td>
+                    <td className="p-4 text-gray-700">{item.serviceType}</td>
+                    <td className="p-4 text-gray-700">{item.petType}</td>
+                    <td className="p-4 text-gray-700">{item.petBreed}</td>
+                    <td className="p-4 text-gray-700">{item.petAge}</td>
+
+                    {/* STATUS BADGE */}
+                    <td className="p-4">
+                      {statusValue === "completed" ? (
+                        <span className="px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full flex items-center w-fit gap-2">
+                          Completed{" "}
+                          <span className="w-2 h-2 bg-green-500 rounded-full" />
+                        </span>
+                      ) : (
+                        <span className="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full flex items-center w-fit gap-2">
+                          Pending{" "}
+                          <span className="w-2 h-2 bg-yellow-500 rounded-full" />
+                        </span>
+                      )}
+                    </td>
+
+                    {/* ACTION MENU */}
+                    <td className="p-4 relative">
+                      <button
+                        onClick={() =>
+                          setOpenMenu(openMenu === item.id ? null : item.id)
+                        }
+                      >
+                        <MoreHorizontal className="h-5 w-5 text-gray-700" />
+                      </button>
+
+                      {openMenu === item.id && (
+                        <div className="absolute right-0 mt-2 w-48 bg-white border shadow-lg rounded-xl z-20">
+                          <button
+                            onClick={() =>
+                              router.push(
+                                `/dashboard/service-management/${item.id}`,
+                              )
+                            }
+                            className="w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
+                          >
+                            View
+                          </button>
+
+                          <button
+                            onClick={() => setDeleteTarget(item.id)}
+                            className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100"
+                          >
+                            Delete
+                          </button>
+
+                          <div className="border-t my-1"></div>
+
+                          <p className="px-4 pt-1 text-xs text-gray-500">
+                            ACTION
+                          </p>
+
+                          <button
+                            onClick={() => updateStatus(item.id, "completed")}
+                            className="w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
+                          >
+                            Completed
+                          </button>
+
+                          <button
+                            onClick={() => updateStatus(item.id, "pending")}
+                            className="w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
+                          >
+                            Not Completed
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })
+            )}
           </tbody>
         </table>
       </div>
 
       {/* FOOTER */}
       <p className="text-gray-600 text-sm mt-4">
-        No of Results {filteredData.length} out of {data.length}
+        No of Results {filteredData.length} out of {total}
       </p>
 
       {/* PAGINATION */}
       <div className="flex items-center gap-2 mt-4">
-        <button className="border px-2 py-1 rounded-lg">&lt;</button>
-        <button className="border px-2 py-1 rounded-lg bg-gray-900 text-white">
-          1
+        <button
+          className="border px-2 py-1 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+          disabled={page === 1}
+        >
+          &lt;
         </button>
-        <button className="border px-2 py-1 rounded-lg">2</button>
-        <button className="border px-2 py-1 rounded-lg">&gt;</button>
+        <button className="border px-2 py-1 rounded-lg bg-gray-900 text-white">
+          {page}
+        </button>
+        <button
+          className="border px-2 py-1 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={() =>
+            setPage((prev) =>
+              Math.min(prev + 1, Math.max(1, Math.ceil(total / pageSize))),
+            )
+          }
+          disabled={page >= Math.max(1, Math.ceil(total / pageSize))}
+        >
+          &gt;
+        </button>
       </div>
 
       {/* DELETE MODAL */}
