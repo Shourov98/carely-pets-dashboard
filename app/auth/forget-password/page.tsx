@@ -2,13 +2,61 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "failed">("idle");
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+  const normalizedBaseUrl = baseUrl ? baseUrl.replace(/\/+$/, "") : "";
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // send reset request logic here
+    if (!normalizedBaseUrl) {
+      setError("NEXT_PUBLIC_API_BASE_URL is not set.");
+      setStatus("failed");
+      return;
+    }
+
+    setStatus("loading");
+    setError(null);
+
+    try {
+      const response = await fetch(
+        `${normalizedBaseUrl}/admin/auth/forgot-password`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email }),
+        },
+      );
+
+      if (!response.ok) {
+        let message = "Failed to request OTP.";
+        try {
+          const errorBody = await response.json();
+          message = errorBody?.message ?? message;
+        } catch {
+          try {
+            const errorText = await response.text();
+            if (errorText) message = errorText;
+          } catch {
+            // Keep fallback message.
+          }
+        }
+        throw new Error(message);
+      }
+
+      router.push(`/auth/otp-verify?email=${encodeURIComponent(email)}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to request OTP.");
+      setStatus("failed");
+    }
   };
 
   return (
@@ -49,6 +97,8 @@ export default function ForgotPasswordPage() {
               type="email"
               placeholder="Enter email"
               required
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
               className="w-full bg-transparent text-sm outline-none placeholder:text-gray-400"
             />
           </div>
@@ -57,15 +107,21 @@ export default function ForgotPasswordPage() {
         {/* Submit Button */}
         <button
           type="submit"
-          className="w-full rounded-xl bg-sky-200 py-3 text-sm font-medium text-sky-900 hover:bg-sky-300 transition"
+          className="w-full rounded-xl bg-sky-200 py-3 text-sm font-medium text-sky-900 hover:bg-sky-300 transition disabled:cursor-not-allowed disabled:opacity-70"
+          disabled={status === "loading"}
         >
-          Next
+          {status === "loading" ? "Sending..." : "Next"}
         </button>
+        {error ? (
+          <p className="text-xs text-red-500" role="alert">
+            {error}
+          </p>
+        ) : null}
 
         {/* Back to Login */}
         <button
           type="button"
-          onClick={() => router.push("/signin")}
+          onClick={() => router.push("/auth/signin")}
           className="flex items-center justify-center gap-2 text-sm text-gray-700 hover:text-sky-600 transition"
         >
           <Image
