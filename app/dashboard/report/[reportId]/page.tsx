@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ChevronDown } from "lucide-react";
+import { useParams } from "next/navigation";
+import { useAppSelector } from "../../../store/hooks";
 
 /* -----------------------------
       TYPES
@@ -10,28 +12,28 @@ import { ChevronDown } from "lucide-react";
 type Reporter = {
   name: string;
   username: string;
-  avatar: string;
-  reason: string;
+  avatar: string | null;
 };
 
 type ReportData = {
-  id: number;
+  id: string;
   count: number;
-  status: "Pending" | "Resolved" | "Dismissed";
-  contentImage: string;
+  status: "pending" | "resolved" | "dismissed" | string;
+  contentImage: string | null;
   contentText: string;
   user: Reporter;
-  reporters: Reporter[];
+  reasons: string[];
 };
 
 interface InfoCardProps {
   title: string;
   value: string | number;
   iconBg: string;
+  icon: React.ReactNode;
 }
 
 interface StatusBadgeProps {
-  status: "Pending" | "Resolved" | "Dismissed";
+  status: "pending" | "resolved" | "dismissed" | string;
 }
 
 interface ReporterCardProps {
@@ -39,59 +41,11 @@ interface ReporterCardProps {
   user: Reporter;
 }
 
-interface ReasonCardProps {
-  reporter: Reporter;
-}
-
-/* -----------------------------
-   FIXED: STRICTLY TYPED DATA
-------------------------------*/
-
-const reportData: ReportData = {
-  id: 1235,
-  count: 45,
-  status: "Pending",
-  contentImage:
-    "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?q=80&w=1820&auto=format",
-  contentText:
-    "A heart with a paw inside could represent love for pets and the community aspect...",
-  user: {
-    name: "Leslie Alexander",
-    username: "@username",
-    avatar:
-      "https://images.unsplash.com/photo-1502685104226-ee32379fefbe?q=80&w=1000&fit=crop",
-    reason: "",
-  },
-  reporters: [
-    {
-      name: "Arlene McCoy",
-      username: "@username",
-      avatar:
-        "https://images.unsplash.com/photo-1502685104226-ee32379fefbe?q=80&w=1000",
-      reason: "Inappropriate content",
-    },
-    {
-      name: "Cody Fisher",
-      username: "@username",
-      avatar:
-        "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1000",
-      reason: "Inappropriate content",
-    },
-    {
-      name: "Kathryn Murphy",
-      username: "@username",
-      avatar:
-        "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=1000",
-      reason: "Inappropriate content",
-    },
-  ],
-};
-
 /* -----------------------------
    COMPONENTS (TYPED)
 ------------------------------*/
 
-function InfoCard({ title, value, iconBg }: InfoCardProps) {
+function InfoCard({ title, value, iconBg, icon }: InfoCardProps) {
   return (
     <div className="bg-white border rounded-2xl p-5 flex items-center justify-between">
       <div>
@@ -102,7 +56,7 @@ function InfoCard({ title, value, iconBg }: InfoCardProps) {
       <div
         className={`w-12 h-12 rounded-xl flex items-center justify-center ${iconBg}`}
       >
-        <span className="text-lg">#</span>
+        {icon}
       </div>
     </div>
   );
@@ -110,23 +64,32 @@ function InfoCard({ title, value, iconBg }: InfoCardProps) {
 
 function StatusBadge({ status }: StatusBadgeProps) {
   const colors: Record<string, string> = {
-    Pending: "bg-yellow-100 text-yellow-700",
-    Resolved: "bg-green-100 text-green-700",
-    Dismissed: "bg-gray-100 text-gray-600",
+    pending: "bg-yellow-100 text-yellow-700",
+    resolved: "bg-green-100 text-green-700",
+    dismissed: "bg-gray-100 text-gray-600",
   };
 
   const dot: Record<string, string> = {
-    Pending: "bg-yellow-500",
-    Resolved: "bg-green-500",
-    Dismissed: "bg-gray-400",
+    pending: "bg-yellow-500",
+    resolved: "bg-green-500",
+    dismissed: "bg-gray-400",
   };
+
+  const normalized = status?.toLowerCase?.() ?? "pending";
+  const display = normalized.charAt(0).toUpperCase() + normalized.slice(1);
 
   return (
     <span
-      className={`px-3 py-1 rounded-full text-xs flex items-center gap-2 w-fit ${colors[status]}`}
+      className={`px-3 py-1 rounded-full text-xs flex items-center gap-2 w-fit ${
+        colors[normalized] ?? colors.pending
+      }`}
     >
-      {status}
-      <span className={`h-2 w-2 rounded-full ${dot[status]}`} />
+      {display}
+      <span
+        className={`h-2 w-2 rounded-full ${
+          dot[normalized] ?? dot.pending
+        }`}
+      />
     </span>
   );
 }
@@ -135,7 +98,7 @@ function ReporterCard({ title, user }: ReporterCardProps) {
   return (
     <div className="bg-white border rounded-xl p-4 flex items-center gap-3">
       <img
-        src={user.avatar}
+        src={user.avatar ?? "https://placehold.co/80x80?text=User"}
         className="w-10 h-10 rounded-full object-cover"
         alt="User avatar"
       />
@@ -148,7 +111,7 @@ function ReporterCard({ title, user }: ReporterCardProps) {
   );
 }
 
-function ReasonCard({ reporter }: ReasonCardProps) {
+function ReasonCard({ reason }: { reason: string }) {
   return (
     <div className="bg-white border rounded-xl p-4">
       <p className="text-sm font-semibold text-gray-900">Reported Reason</p>
@@ -157,7 +120,7 @@ function ReasonCard({ reporter }: ReasonCardProps) {
         CONTENT VIOLATIONS
       </p>
 
-      <p className="text-sm text-gray-700 mt-1">{reporter.reason}</p>
+      <p className="text-sm text-gray-700 mt-1">{reason}</p>
     </div>
   );
 }
@@ -168,8 +131,103 @@ function ReasonCard({ reporter }: ReasonCardProps) {
 
 export default function ReportDetailsPage() {
   const [actionOpen, setActionOpen] = useState(false);
+  const [report, setReport] = useState<ReportData | null>(null);
+  const [status, setStatus] = useState<"idle" | "loading" | "failed">("idle");
+  const [error, setError] = useState<string | null>(null);
 
-  const report = reportData;
+  const params = useParams<{ reportId: string }>();
+  const reportId = params?.reportId;
+  const accessToken = useAppSelector((state) => state.auth.tokens?.accessToken);
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+  const normalizedBaseUrl = baseUrl ? baseUrl.replace(/\/+$/, "") : "";
+
+  useEffect(() => {
+    const fetchReport = async () => {
+      if (!reportId) return;
+      if (!normalizedBaseUrl) {
+        setError("NEXT_PUBLIC_API_BASE_URL is not set.");
+        setStatus("failed");
+        return;
+      }
+      if (!accessToken) {
+        setError("Missing access token.");
+        setStatus("failed");
+        return;
+      }
+
+      setStatus("loading");
+      setError(null);
+
+      try {
+        const response = await fetch(
+          `${normalizedBaseUrl}/admin/reports/${reportId}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${accessToken}`,
+            },
+          },
+        );
+
+        if (!response.ok) {
+          let message = "Failed to fetch report details.";
+          try {
+            const errorBody = await response.json();
+            message = errorBody?.message ?? message;
+          } catch {
+            try {
+              const errorText = await response.text();
+              if (errorText) message = errorText;
+            } catch {
+              // Keep fallback message.
+            }
+          }
+          throw new Error(message);
+        }
+
+        const data = await response.json();
+        const item = data?.data;
+        if (!item || typeof item !== "object") {
+          throw new Error("Invalid report response.");
+        }
+
+        const media = Array.isArray(item.post?.media) ? item.post.media : [];
+        const firstImage = media.find((m: { type?: string }) =>
+          m?.type ? m.type === "image" : false,
+        );
+
+        setReport({
+          id: item.id ?? "",
+          count: item.count ?? 0,
+          status: item.status ?? "pending",
+          contentImage: firstImage?.url ?? null,
+          contentText: item.post?.text ?? "",
+          user: {
+            name: item.reportedUser?.name ?? "Unknown",
+            username: item.reportedUser?.username
+              ? `@${item.reportedUser.username}`
+              : "@unknown",
+            avatar: item.reportedUser?.avatarUrl ?? null,
+          },
+          reasons: Array.isArray(item.reasons) ? item.reasons : [],
+        });
+        setStatus("idle");
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to fetch report details.",
+        );
+        setStatus("failed");
+      }
+    };
+
+    fetchReport();
+  }, [accessToken, normalizedBaseUrl, reportId]);
+
+  const contentText = useMemo(() => {
+    if (!report?.contentText) return "";
+    return report.contentText;
+  }, [report]);
 
   return (
     <div className="space-y-8 w-full">
@@ -217,47 +275,74 @@ export default function ReportDetailsPage() {
         </div>
       </div>
 
-      {/* SUMMARY CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <InfoCard title="Report ID" value={report.id} iconBg="bg-[#F7E3FF]" />
-
-        <InfoCard
-          title="Report Count"
-          value={report.count}
-          iconBg="bg-[#FFE9D2]"
-        />
-
-        <div className="flex items-center">
-          <StatusBadge status={report.status} />
+      {status === "loading" ? (
+        <div className="bg-white border rounded-2xl p-6 text-gray-600">
+          Loading report details...
         </div>
-      </div>
-
-      {/* CONTENT SECTION */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="col-span-2 bg-white border rounded-2xl p-5 space-y-4">
-          <img
-            src={report.contentImage}
-            className="w-full h-80 object-cover rounded-xl"
-            alt=""
-          />
-
-          <p className="text-gray-700 text-sm leading-relaxed">
-            {report.contentText.repeat(5)}
-          </p>
+      ) : status === "failed" ? (
+        <div className="bg-white border rounded-2xl p-6 text-red-600">
+          {error ?? "Failed to load report details."}
         </div>
+      ) : report ? (
+        <>
+          {/* SUMMARY CARDS */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <InfoCard
+              title="Report ID"
+              value={report.id}
+              iconBg="bg-[#F7E3FF]"
+              icon={
+                <span className="text-lg font-semibold text-[#A855F7]">|||</span>
+              }
+            />
 
-        {/* REPORTERS LIST */}
-        <div className="col-span-1 space-y-4 max-h-[700px] overflow-y-auto pr-2">
-          <ReporterCard title="Reported User" user={report.user} />
+            <InfoCard
+              title="Report Count"
+              value={report.count}
+              iconBg="bg-[#FFE9D2]"
+              icon={<span className="text-lg font-semibold text-[#D97706]">Nº</span>}
+            />
 
-          {report.reporters.map((r, i) => (
-            <div key={i} className="grid grid-cols-2 gap-3">
-              <ReporterCard title="Reported By" user={r} />
-              <ReasonCard reporter={r} />
+            <div className="flex items-center">
+              <StatusBadge status={report.status} />
             </div>
-          ))}
-        </div>
-      </div>
+          </div>
+
+          {/* CONTENT SECTION */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="col-span-2 bg-white border rounded-2xl p-5 space-y-4">
+              {report.contentImage ? (
+                <img
+                  src={report.contentImage}
+                  className="w-full max-w-xl h-auto rounded-xl"
+                  alt="Reported content"
+                />
+              ) : (
+                <div className="w-full max-w-xl h-64 rounded-xl bg-gray-50 flex items-center justify-center text-gray-500 text-sm">
+                  No media available
+                </div>
+              )}
+
+              {contentText ? (
+                <p className="text-gray-700 text-sm leading-relaxed">
+                  {contentText}
+                </p>
+              ) : (
+                <p className="text-gray-500 text-sm">No text provided.</p>
+              )}
+            </div>
+
+            {/* REPORTERS LIST */}
+            <div className="col-span-1 space-y-4 max-h-[700px] overflow-y-auto pr-2">
+              <ReporterCard title="Reported User" user={report.user} />
+
+              {report.reasons.map((reason, i) => (
+                <ReasonCard key={`${reason}-${i}`} reason={reason} />
+              ))}
+            </div>
+          </div>
+        </>
+      ) : null}
     </div>
   );
 }
