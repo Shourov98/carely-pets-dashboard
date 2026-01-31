@@ -10,6 +10,11 @@ export default function OtpVerifyPage() {
   const email = searchParams.get("email") ?? "example@gmail.com";
   const [otp, setOtp] = useState(["", "", "", ""]);
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
+  const [status, setStatus] = useState<"idle" | "loading" | "failed">("idle");
+  const [error, setError] = useState<string | null>(null);
+
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+  const normalizedBaseUrl = baseUrl ? baseUrl.replace(/\/+$/, "") : "";
 
   const handleChange = (index: number, value: string) => {
     if (!/^[0-9]?$/.test(value)) return;
@@ -31,11 +36,54 @@ export default function OtpVerifyPage() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const code = otp.join("");
-    if (code.length === 4) {
-      router.push("/reset-password");
+    if (code.length !== 4) return;
+    if (!normalizedBaseUrl) {
+      setError("NEXT_PUBLIC_API_BASE_URL is not set.");
+      setStatus("failed");
+      return;
+    }
+
+    setStatus("loading");
+    setError(null);
+
+    try {
+      const response = await fetch(
+        `${normalizedBaseUrl}/admin/auth/verify-otp`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            otp: code,
+          }),
+        },
+      );
+
+      if (!response.ok) {
+        let message = "Failed to verify OTP.";
+        try {
+          const errorBody = await response.json();
+          message = errorBody?.message ?? message;
+        } catch {
+          try {
+            const errorText = await response.text();
+            if (errorText) message = errorText;
+          } catch {
+            // Keep fallback message.
+          }
+        }
+        throw new Error(message);
+      }
+
+      router.push(`/auth/reset-password?email=${encodeURIComponent(email)}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to verify OTP.");
+      setStatus("failed");
     }
   };
 
@@ -95,10 +143,16 @@ export default function OtpVerifyPage() {
         {/* Submit */}
         <button
           type="submit"
-          className="w-full rounded-xl bg-sky-200 py-3 text-sm font-medium text-sky-900 hover:bg-sky-300 transition"
+          className="w-full rounded-xl bg-sky-200 py-3 text-sm font-medium text-sky-900 hover:bg-sky-300 transition disabled:cursor-not-allowed disabled:opacity-70"
+          disabled={status === "loading"}
         >
-          Next
+          {status === "loading" ? "Verifying..." : "Next"}
         </button>
+        {error ? (
+          <p className="text-xs text-red-500" role="alert">
+            {error}
+          </p>
+        ) : null}
 
         {/* Resend */}
         <p className="text-sm text-gray-600">
