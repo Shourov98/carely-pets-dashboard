@@ -7,8 +7,8 @@ import Link from "next/link";
 type ActionType = "delete" | "remove";
 
 interface ActionMenuProps {
-  reportId: number;
-  onDeleteClick: (type: ActionType, id: number) => void;
+  reportId: string;
+  onDeleteClick: (type: ActionType, id: string) => void;
 }
 
 export default function ActionMenu({

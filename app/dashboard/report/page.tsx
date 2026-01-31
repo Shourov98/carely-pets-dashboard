@@ -1,26 +1,52 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import ConfirmModal from "./ConfirmModal";
 import ActionMenu from "./ActionMenu";
+import { useAppSelector } from "../../store/hooks";
 
 type ActionType = "delete" | "remove";
 
 interface SelectedReportState {
   type: ActionType;
-  id: number;
+  id: string;
 }
+
+type ReportItem = {
+  id: string;
+  postId: string;
+  reportedUser: {
+    id: string;
+    name: string;
+    username: string;
+    avatarUrl: string | null;
+  };
+  count: number;
+  status: string;
+  reasons: string[];
+  createdAt: string;
+  updatedAt: string;
+};
 
 export default function ReportPage() {
   const [statusFilter, setStatusFilter] = useState("Status");
   const [filterOpen, setFilterOpen] = useState(false);
+  const [reports, setReports] = useState<ReportItem[]>([]);
+  const [status, setStatus] = useState<"idle" | "loading" | "failed">("idle");
+  const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
 
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedReport, setSelectedReport] =
     useState<SelectedReportState | null>(null);
 
-  const handleDeleteClick = (type: ActionType, id: number) => {
+  const accessToken = useAppSelector((state) => state.auth.tokens?.accessToken);
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+  const normalizedBaseUrl = baseUrl ? baseUrl.replace(/\/+$/, "") : "";
+
+  const handleDeleteClick = (type: ActionType, id: string) => {
     setSelectedReport({ type, id });
     setModalOpen(true);
   };
@@ -41,29 +67,91 @@ export default function ReportPage() {
     },
   };
 
-  const data = [
-    {
-      id: 123,
-      name: "Leslie Alexander",
-      count: 45,
-      username: "@username",
-      status: "Resolved",
-    },
-    {
-      id: 456, // <-- UNIQUE ID
-      name: "Devon Lane",
-      count: 25,
-      username: "@username",
-      status: "Dismissed",
-    },
-    {
-      id: 789,
-      name: "Albert Flores",
-      count: 20,
-      username: "@username",
-      status: "Pending",
-    },
-  ];
+  useEffect(() => {
+    const fetchReports = async () => {
+      if (!normalizedBaseUrl) {
+        setError("NEXT_PUBLIC_API_BASE_URL is not set.");
+        setStatus("failed");
+        return;
+      }
+      if (!accessToken) {
+        setError("Missing access token.");
+        setStatus("failed");
+        return;
+      }
+
+      setStatus("loading");
+      setError(null);
+
+      try {
+        const response = await fetch(`${normalizedBaseUrl}/admin/reports`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+
+        if (!response.ok) {
+          let message = "Failed to fetch reports.";
+          try {
+            const errorBody = await response.json();
+            message = errorBody?.message ?? message;
+          } catch {
+            try {
+              const errorText = await response.text();
+              if (errorText) message = errorText;
+            } catch {
+              // Keep fallback message.
+            }
+          }
+          throw new Error(message);
+        }
+
+        const data = await response.json();
+        const items = data?.data;
+        if (!Array.isArray(items)) {
+          throw new Error("Invalid reports response.");
+        }
+
+        setReports(items);
+        setStatus("idle");
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to fetch reports.");
+        setStatus("failed");
+      }
+    };
+
+    fetchReports();
+  }, [accessToken, normalizedBaseUrl]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [statusFilter]);
+
+  const filteredReports = useMemo(() => {
+    if (statusFilter === "Status" || statusFilter === "All") {
+      return reports;
+    }
+    const normalizedFilter = statusFilter.toLowerCase();
+    return reports.filter(
+      (report) => report.status?.toLowerCase() === normalizedFilter,
+    );
+  }, [reports, statusFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredReports.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+
+  const pagedReports = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    const end = start + pageSize;
+    return filteredReports.slice(start, end);
+  }, [filteredReports, currentPage, pageSize]);
+
+  const pageNumbers = useMemo(
+    () => Array.from({ length: totalPages }, (_, index) => index + 1),
+    [totalPages],
+  );
 
   return (
     <div className="space-y-8 w-full">
@@ -137,65 +225,110 @@ export default function ReportPage() {
           </thead>
 
           <tbody>
-            {data.map((item) => (
-              <tr key={item.id} className="border-t">
-                <td className="py-4 px-5 text-gray-800">{item.id}</td>
-                <td className="py-4 px-5 text-gray-900">{item.name}</td>
-                <td className="py-4 px-5 text-gray-700">{item.count}</td>
-                <td className="py-4 px-5 text-gray-700">{item.username}</td>
-
-                {/* STATUS BADGE */}
-                <td className="py-4 px-5">
-                  {item.status === "Resolved" && (
-                    <span className="px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full flex items-center gap-1 w-fit">
-                      Resolved{" "}
-                      <span className="h-2 w-2 bg-green-500 rounded-full" />
-                    </span>
-                  )}
-                  {item.status === "Dismissed" && (
-                    <span className="px-3 py-1 bg-gray-100 text-gray-600 text-xs rounded-full flex items-center gap-1 w-fit">
-                      Dismissed{" "}
-                      <span className="h-2 w-2 bg-gray-400 rounded-full" />
-                    </span>
-                  )}
-                  {item.status === "Pending" && (
-                    <span className="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full flex items-center gap-1 w-fit">
-                      Pending{" "}
-                      <span className="h-2 w-2 bg-yellow-500 rounded-full" />
-                    </span>
-                  )}
-                </td>
-
-                <td className="py-4 px-5">
-                  <ActionMenu
-                    reportId={item.id}
-                    onDeleteClick={handleDeleteClick}
-                  />
+            {status === "loading" ? (
+              <tr className="border-t">
+                <td className="py-6 px-5 text-center text-gray-600" colSpan={6}>
+                  Loading reports...
                 </td>
               </tr>
-            ))}
+            ) : status === "failed" ? (
+              <tr className="border-t">
+                <td className="py-6 px-5 text-center text-red-600" colSpan={6}>
+                  {error ?? "Failed to load reports."}
+                </td>
+              </tr>
+            ) : pagedReports.length === 0 ? (
+              <tr className="border-t">
+                <td className="py-6 px-5 text-center text-gray-600" colSpan={6}>
+                  No reports found.
+                </td>
+              </tr>
+            ) : (
+              pagedReports.map((item) => {
+                const statusValue = item.status?.toLowerCase();
+                const displayStatus =
+                  statusValue.charAt(0).toUpperCase() + statusValue.slice(1);
+                return (
+                  <tr key={item.id} className="border-t">
+                    <td className="py-4 px-5 text-gray-800">{item.id}</td>
+                    <td className="py-4 px-5 text-gray-900">
+                      {item.reportedUser?.name ?? "Unknown"}
+                    </td>
+                    <td className="py-4 px-5 text-gray-700">{item.count}</td>
+                    <td className="py-4 px-5 text-gray-700">
+                      {item.reportedUser?.username
+                        ? `@${item.reportedUser.username}`
+                        : "-"}
+                    </td>
+
+                    {/* STATUS BADGE */}
+                    <td className="py-4 px-5">
+                      {statusValue === "resolved" ? (
+                        <span className="px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full flex items-center gap-1 w-fit">
+                          Resolved
+                          <span className="h-2 w-2 bg-green-500 rounded-full" />
+                        </span>
+                      ) : statusValue === "dismissed" ? (
+                        <span className="px-3 py-1 bg-gray-100 text-gray-600 text-xs rounded-full flex items-center gap-1 w-fit">
+                          Dismissed
+                          <span className="h-2 w-2 bg-gray-400 rounded-full" />
+                        </span>
+                      ) : (
+                        <span className="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full flex items-center gap-1 w-fit">
+                          {displayStatus || "Pending"}
+                          <span className="h-2 w-2 bg-yellow-500 rounded-full" />
+                        </span>
+                      )}
+                    </td>
+
+                    <td className="py-4 px-5">
+                      <ActionMenu
+                        reportId={item.id}
+                        onDeleteClick={handleDeleteClick}
+                      />
+                    </td>
+                  </tr>
+                );
+              })
+            )}
           </tbody>
         </table>
       </div>
 
       {/* FOOTER SUMMARY */}
-      <p className="text-sm text-gray-600">No of Results 8 out of 100</p>
+      <p className="text-sm text-gray-600">
+        No of Results {filteredReports.length} out of {reports.length}
+      </p>
 
       {/* PAGINATION */}
       <div className="flex items-center gap-2">
-        <button className="p-2 border rounded-lg hover:bg-gray-50">
+        <button
+          className="p-2 border rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+          disabled={currentPage === 1}
+        >
           <ChevronLeft className="h-4 w-4 text-gray-700" />
         </button>
 
-        <button className="px-4 py-2 border rounded-lg bg-black text-white">
-          1
-        </button>
+        {pageNumbers.map((number) => (
+          <button
+            key={number}
+            className={`px-4 py-2 border rounded-lg ${
+              number === currentPage
+                ? "bg-black text-white"
+                : "text-gray-700 hover:bg-gray-50"
+            }`}
+            onClick={() => setPage(number)}
+          >
+            {number}
+          </button>
+        ))}
 
-        <button className="px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50">
-          2
-        </button>
-
-        <button className="p-2 border rounded-lg hover:bg-gray-50">
+        <button
+          className="p-2 border rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+          disabled={currentPage === totalPages}
+        >
           <ChevronRight className="h-4 w-4 text-gray-700" />
         </button>
       </div>
