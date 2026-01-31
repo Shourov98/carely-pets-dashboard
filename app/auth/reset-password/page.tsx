@@ -1,23 +1,82 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email") ?? "";
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [status, setStatus] = useState<"idle" | "loading" | "failed">("idle");
+  const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
     newPassword: "",
     confirmPassword: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+  const normalizedBaseUrl = baseUrl ? baseUrl.replace(/\/+$/, "") : "";
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Add validation + API call for password reset here
-    console.log("New password set:", form);
-    router.push("/signin"); // Redirect to login after success
+    if (!normalizedBaseUrl) {
+      setError("NEXT_PUBLIC_API_BASE_URL is not set.");
+      setStatus("failed");
+      return;
+    }
+    if (!email) {
+      setError("Missing email for password reset.");
+      setStatus("failed");
+      return;
+    }
+    if (form.newPassword !== form.confirmPassword) {
+      setError("Passwords do not match.");
+      setStatus("failed");
+      return;
+    }
+
+    setStatus("loading");
+    setError(null);
+
+    try {
+      const response = await fetch(
+        `${normalizedBaseUrl}/admin/auth/reset-password`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            newPassword: form.newPassword,
+          }),
+        },
+      );
+
+      if (!response.ok) {
+        let message = "Failed to reset password.";
+        try {
+          const errorBody = await response.json();
+          message = errorBody?.message ?? message;
+        } catch {
+          try {
+            const errorText = await response.text();
+            if (errorText) message = errorText;
+          } catch {
+            // Keep fallback message.
+          }
+        }
+        throw new Error(message);
+      }
+
+      router.push("/auth/signin");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to reset password.");
+      setStatus("failed");
+    }
   };
 
   return (
@@ -122,9 +181,15 @@ export default function ResetPasswordPage() {
             text-text-inverted font-semibold
             py-3 sm:py-3.5 rounded-lg transition
           "
+          disabled={status === "loading"}
         >
-          Next
+          {status === "loading" ? "Updating..." : "Next"}
         </button>
+        {error ? (
+          <p className="text-xs text-red-500" role="alert">
+            {error}
+          </p>
+        ) : null}
 
         {/* Resend + Back */}
         <div className="flex flex-col items-center gap-3 text-sm text-black mt-1">
@@ -140,7 +205,7 @@ export default function ResetPasswordPage() {
 
           <button
             type="button"
-            onClick={() => router.push("/signin")}
+            onClick={() => router.push("/auth/signin")}
             className="flex items-center gap-2 text-text-tertiary text-blue-500 hover:text-blue-700 transition"
           >
             <Image

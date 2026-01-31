@@ -12,6 +12,9 @@ export default function OtpVerifyPage() {
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
   const [status, setStatus] = useState<"idle" | "loading" | "failed">("idle");
   const [error, setError] = useState<string | null>(null);
+  const [resendStatus, setResendStatus] = useState<
+    "idle" | "loading" | "success" | "failed"
+  >("idle");
 
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
   const normalizedBaseUrl = baseUrl ? baseUrl.replace(/\/+$/, "") : "";
@@ -87,8 +90,49 @@ export default function OtpVerifyPage() {
     }
   };
 
-  const handleResend = () => {
-    console.log("Resend OTP");
+  const handleResend = async () => {
+    if (!normalizedBaseUrl) {
+      setError("NEXT_PUBLIC_API_BASE_URL is not set.");
+      setResendStatus("failed");
+      return;
+    }
+
+    setResendStatus("loading");
+    setError(null);
+
+    try {
+      const response = await fetch(
+        `${normalizedBaseUrl}/admin/auth/forgot-password`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email }),
+        },
+      );
+
+      if (!response.ok) {
+        let message = "Failed to resend OTP.";
+        try {
+          const errorBody = await response.json();
+          message = errorBody?.message ?? message;
+        } catch {
+          try {
+            const errorText = await response.text();
+            if (errorText) message = errorText;
+          } catch {
+            // Keep fallback message.
+          }
+        }
+        throw new Error(message);
+      }
+
+      setResendStatus("success");
+    } catch (err) {
+      setResendStatus("failed");
+      setError(err instanceof Error ? err.message : "Failed to resend OTP.");
+    }
   };
 
   return (
@@ -161,10 +205,14 @@ export default function OtpVerifyPage() {
             type="button"
             onClick={handleResend}
             className="text-sky-600 font-medium hover:underline"
+            disabled={resendStatus === "loading"}
           >
-            Resend again
+            {resendStatus === "loading" ? "Resending..." : "Resend again"}
           </button>
         </p>
+        {resendStatus === "success" ? (
+          <p className="text-xs text-green-600">OTP sent again.</p>
+        ) : null}
       </form>
     </div>
   );
