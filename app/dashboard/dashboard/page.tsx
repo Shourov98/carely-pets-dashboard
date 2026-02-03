@@ -46,15 +46,9 @@ const monthLabels = [
 
 export default function DashboardPage() {
   const today = new Date();
-  const [selectedMonth, setSelectedMonth] = useState(
-    months[today.getMonth()],
-  );
-  const [selectedYear, setSelectedYear] = useState(
-    String(today.getFullYear()),
-  );
-  const [metricsYear, setMetricsYear] = useState(
-    String(today.getFullYear()),
-  );
+  const [selectedMonth, setSelectedMonth] = useState(months[today.getMonth()]);
+  const [selectedYear, setSelectedYear] = useState(String(today.getFullYear()));
+  const [metricsYear, setMetricsYear] = useState(String(today.getFullYear()));
   const [breakdown, setBreakdown] = useState<{
     adoption: number;
     service: number;
@@ -302,7 +296,7 @@ export default function DashboardPage() {
       ) : null}
 
       {/* USER METRICS */}
-      <div className="bg-white border rounded-2xl p-5 shadow-sm">
+      <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-gray-800">User Metrics</h2>
 
@@ -322,7 +316,11 @@ export default function DashboardPage() {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={metricsChart}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" tick={{ fontSize: 12 }} axisLine={false} />
+                <XAxis
+                  dataKey="name"
+                  tick={{ fontSize: 12 }}
+                  axisLine={false}
+                />
                 <YAxis tick={{ fontSize: 12 }} axisLine={false} />
                 <Tooltip />
                 <Bar dataKey="value" fill="#00A7C7" radius={[6, 6, 0, 0]} />
@@ -343,7 +341,7 @@ interface SummaryCardProps {
 
 function SummaryCard({ title, value, icon }: SummaryCardProps) {
   return (
-    <div className="bg-white border rounded-2xl p-6 shadow-sm flex justify-between items-center">
+    <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm flex justify-between items-center">
       <div>
         <p className="text-xs tracking-wide text-gray-900">{title}</p>
         <p className="text-2xl text-gray-900 font-semibold mt-1">{value}</p>

@@ -56,7 +56,7 @@ export default function AdoptionManagementPage() {
 
   const pageNumbers = useMemo(
     () => Array.from({ length: totalPages }, (_, index) => index + 1),
-    [totalPages]
+    [totalPages],
   );
 
   const openDeleteModal = (id: string) => {
@@ -145,7 +145,7 @@ export default function AdoptionManagementPage() {
       </div>
 
       {/* TABLE */}
-      <div className="bg-white border rounded-2xl shadow-sm">
+      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm">
         <table className="w-full text-left">
           <thead className="bg-gray-50">
             <tr>
@@ -170,35 +170,26 @@ export default function AdoptionManagementPage() {
 
           <tbody>
             {status === "loading" && items.length === 0 ? (
-              <tr className="border-t">
-                <td
-                  colSpan={7}
-                  className="py-6 px-5 text-center text-gray-600"
-                >
+              <tr className="border-t border-gray-200">
+                <td colSpan={7} className="py-6 px-5 text-center text-gray-600">
                   Loading adoption list...
                 </td>
               </tr>
             ) : status === "failed" && items.length === 0 ? (
-              <tr className="border-t">
-                <td
-                  colSpan={7}
-                  className="py-6 px-5 text-center text-red-600"
-                >
+              <tr className="border-t border-gray-200">
+                <td colSpan={7} className="py-6 px-5 text-center text-red-600">
                   {error ?? "Failed to load adoption list."}
                 </td>
               </tr>
             ) : pagedItems.length === 0 ? (
-              <tr className="border-t">
-                <td
-                  colSpan={7}
-                  className="py-6 px-5 text-center text-gray-600"
-                >
+              <tr className="border-t border-gray-200">
+                <td colSpan={7} className="py-6 px-5 text-center text-gray-600">
                   No pets found.
                 </td>
               </tr>
             ) : (
               pagedItems.map((item, index) => (
-                <tr key={item.id} className="border-t">
+                <tr key={item.id} className="border-t border-gray-200">
                   <td className="py-4 px-5 text-gray-700">
                     {(currentPage - 1) * pageSize + index + 1}
                   </td>
@@ -238,7 +229,7 @@ export default function AdoptionManagementPage() {
                     {menuOpenId === item.id && (
                       <div
                         ref={menuRef}
-                        className="absolute right-5 mt-2 w-32 bg-white border rounded-xl shadow-md z-20"
+                        className="absolute right-5 mt-2 w-32 bg-white border border-gray-200 rounded-xl shadow-md z-20"
                       >
                         <button
                           className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-50"
@@ -294,7 +285,7 @@ export default function AdoptionManagementPage() {
       {/* PAGINATION */}
       <div className="flex items-center gap-2">
         <button
-          className="p-2 border rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="p-2 border border-gray-400 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={() => setPage((prev) => Math.max(1, prev - 1))}
           disabled={currentPage === 1}
         >
@@ -304,7 +295,7 @@ export default function AdoptionManagementPage() {
         {pageNumbers.map((number) => (
           <button
             key={number}
-            className={`px-4 py-2 border rounded-lg ${
+            className={`px-4 py-2 border border-gray-400 rounded-lg ${
               number === currentPage
                 ? "bg-black text-white"
                 : "text-gray-700 hover:bg-gray-50"
@@ -316,7 +307,7 @@ export default function AdoptionManagementPage() {
         ))}
 
         <button
-          className="p-2 border rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="p-2 border border-gray-400 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
           disabled={currentPage === totalPages}
         >

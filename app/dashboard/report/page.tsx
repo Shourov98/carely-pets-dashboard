@@ -279,7 +279,7 @@ export default function ReportPage() {
           </button>
 
           {filterOpen && (
-            <div className="absolute right-0 mt-2 bg-white border rounded-xl shadow-md z-30 w-40">
+            <div className="absolute right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-md z-30 w-40">
               {["All", "Resolved", "Dismissed", "Pending"].map((item) => (
                 <button
                   key={item}
@@ -298,7 +298,7 @@ export default function ReportPage() {
       </div>
 
       {/* TABLE */}
-      <div className="bg-white border rounded-2xl shadow-sm overflow-visible relative">
+      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-visible relative">
         <table className="w-full text-left">
           <thead className="bg-gray-50">
             <tr>
@@ -325,19 +325,19 @@ export default function ReportPage() {
 
           <tbody>
             {status === "loading" ? (
-              <tr className="border-t">
+              <tr className="border-t border-gray-200">
                 <td className="py-6 px-5 text-center text-gray-600" colSpan={6}>
                   Loading reports...
                 </td>
               </tr>
             ) : status === "failed" ? (
-              <tr className="border-t">
+              <tr className="border-t border-gray-200">
                 <td className="py-6 px-5 text-center text-red-600" colSpan={6}>
                   {error ?? "Failed to load reports."}
                 </td>
               </tr>
             ) : pagedReports.length === 0 ? (
-              <tr className="border-t">
+              <tr className="border-t border-gray-200">
                 <td className="py-6 px-5 text-center text-gray-600" colSpan={6}>
                   No reports found.
                 </td>
@@ -348,7 +348,7 @@ export default function ReportPage() {
                 const displayStatus =
                   statusValue.charAt(0).toUpperCase() + statusValue.slice(1);
                 return (
-                  <tr key={item.id} className="border-t">
+                  <tr key={item.id} className="border-t border-gray-200">
                     <td className="py-4 px-5 text-gray-800">{item.id}</td>
                     <td className="py-4 px-5 text-gray-900">
                       {item.reportedUser?.name ?? "Unknown"}
@@ -406,7 +406,7 @@ export default function ReportPage() {
       {/* PAGINATION */}
       <div className="flex items-center gap-2">
         <button
-          className="p-2 border rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={() => setPage((prev) => Math.max(1, prev - 1))}
           disabled={currentPage === 1}
         >
@@ -416,7 +416,7 @@ export default function ReportPage() {
         {pageNumbers.map((number) => (
           <button
             key={number}
-            className={`px-4 py-2 border rounded-lg ${
+            className={`px-4 py-2 border border-gray-200 rounded-lg ${
               number === currentPage
                 ? "bg-black text-white"
                 : "text-gray-700 hover:bg-gray-50"
@@ -428,7 +428,7 @@ export default function ReportPage() {
         ))}
 
         <button
-          className="p-2 border rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
           disabled={currentPage === totalPages}
         >

@@ -48,7 +48,7 @@ interface ReporterCardProps {
 
 function InfoCard({ title, value, iconBg, icon }: InfoCardProps) {
   return (
-    <div className="bg-white border rounded-2xl p-5 flex items-center justify-between">
+    <div className="bg-white border border-gray-200 rounded-2xl p-5 flex items-center justify-between">
       <div>
         <p className="text-sm text-gray-500">{title}</p>
         <p className="text-xl font-semibold text-gray-900 mt-1">{value}</p>
@@ -95,7 +95,7 @@ function StatusBadge({ status }: StatusBadgeProps) {
 
 function ReporterCard({ title, user }: ReporterCardProps) {
   return (
-    <div className="bg-white border rounded-xl p-4 flex items-center gap-3">
+    <div className="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
       <img
         src={user.avatar ?? "https://placehold.co/80x80?text=User"}
         className="w-10 h-10 rounded-full object-cover"
@@ -112,7 +112,7 @@ function ReporterCard({ title, user }: ReporterCardProps) {
 
 function ReasonCard({ reason }: { reason: string }) {
   return (
-    <div className="bg-white border rounded-xl p-4">
+    <div className="bg-white border border-gray-200 rounded-xl p-4">
       <p className="text-sm font-semibold text-gray-900">Reported Reason</p>
 
       <p className="text-xs text-gray-500 mt-1 uppercase tracking-wide">
@@ -423,7 +423,9 @@ export default function ReportDetailsPage() {
       setDeleteOpen(false);
     } catch (err) {
       setDeleteStatus("failed");
-      setDeleteError(err instanceof Error ? err.message : "Failed to warn user.");
+      setDeleteError(
+        err instanceof Error ? err.message : "Failed to warn user.",
+      );
     }
   };
 
@@ -530,7 +532,7 @@ export default function ReportDetailsPage() {
           </button>
 
           {actionOpen && (
-            <div className="absolute right-0 mt-2 bg-white border rounded-xl shadow-md w-44 z-20">
+            <div className="absolute right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-md w-44 z-20">
               <button
                 onClick={() => {
                   setDeleteError(null);
@@ -581,11 +583,11 @@ export default function ReportDetailsPage() {
       </div>
 
       {status === "loading" ? (
-        <div className="bg-white border rounded-2xl p-6 text-gray-600">
+        <div className="bg-white border border-gray-200 rounded-2xl p-6 text-gray-600">
           Loading report details...
         </div>
       ) : status === "failed" ? (
-        <div className="bg-white border rounded-2xl p-6 text-red-600">
+        <div className="bg-white border border-gray-200 rounded-2xl p-6 text-red-600">
           {error ?? "Failed to load report details."}
         </div>
       ) : report ? (
@@ -619,7 +621,7 @@ export default function ReportDetailsPage() {
 
           {/* CONTENT SECTION */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="col-span-2 bg-white border rounded-2xl p-5 space-y-4">
+            <div className="col-span-2 bg-white border border-gray-200 rounded-2xl p-5 space-y-4">
               {report.contentImage ? (
                 <img
                   src={report.contentImage}
@@ -667,7 +669,7 @@ export default function ReportDetailsPage() {
                 ? "Warn User?"
                 : deleteAction === "dismiss"
                   ? "Dismiss Report?"
-                : "Delete Report?"
+                  : "Delete Report?"
           }
           description={
             deleteAction === "remove"
@@ -676,7 +678,7 @@ export default function ReportDetailsPage() {
                 ? "A warning will be sent to the user for this reported content."
                 : deleteAction === "dismiss"
                   ? "This report will be marked as dismissed."
-                : "Deleting this report will permanently remove it from the database."
+                  : "Deleting this report will permanently remove it from the database."
           }
           onClose={() => {
             setDeleteOpen(false);
@@ -689,7 +691,7 @@ export default function ReportDetailsPage() {
                 ? handleWarnUser
                 : deleteAction === "dismiss"
                   ? handleDismissReport
-                : handleDeleteReport
+                  : handleDeleteReport
           }
           loading={deleteStatus === "loading"}
         />

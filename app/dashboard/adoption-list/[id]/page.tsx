@@ -46,7 +46,7 @@ export default function EditPetForAdoption() {
   const adoptionId = Array.isArray(params?.id) ? params.id[0] : params?.id;
   const headerId = useMemo(
     () => (adoptionId ? `Listing ID: ${adoptionId}` : "Listing ID: —"),
-    [adoptionId]
+    [adoptionId],
   );
 
   const [petInfoOpen, setPetInfoOpen] = useState(true);
@@ -92,7 +92,7 @@ export default function EditPetForAdoption() {
       </div>
 
       {/* ------------------- PET SNAPS ------------------- */}
-      <div className="bg-white border rounded-2xl p-5 shadow-sm">
+      <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
           <div>
             <p className="font-semibold text-gray-900">Pet Snaps</p>
@@ -113,7 +113,7 @@ export default function EditPetForAdoption() {
           {snaps.map((snap) => (
             <div
               key={snap.id}
-              className="border rounded-xl px-4 py-3 flex justify-between items-center bg-gray-50"
+              className="border border-gray-200 rounded-xl px-4 py-3 flex justify-between items-center bg-gray-50"
             >
               <div>
                 <p className="text-gray-800 font-medium">{snap.name}</p>
@@ -133,7 +133,7 @@ export default function EditPetForAdoption() {
       </div>
 
       {/* ------------------- PET INFORMATION ------------------- */}
-      <div className="bg-white border rounded-2xl p-5 shadow-sm">
+      <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
         <button
           type="button"
           onClick={() => setPetInfoOpen(!petInfoOpen)}
@@ -236,7 +236,6 @@ export default function EditPetForAdoption() {
           </div>
         )}
       </div>
-
 
       {/* ACTION BUTTONS */}
       <div className="flex justify-end gap-4">

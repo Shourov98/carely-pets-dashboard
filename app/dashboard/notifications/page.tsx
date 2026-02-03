@@ -65,7 +65,7 @@ export default function NotificationsPage() {
 /* ------------------ SECTION LABEL ------------------ */
 function SectionLabel({ text }: { text: string }) {
   return (
-    <h2 className="text-lg font-semibold text-gray-800 border-b pb-1">
+    <h2 className="text-lg font-semibold text-gray-800 border-b border-gray-200 pb-1">
       {text}
     </h2>
   );
@@ -84,7 +84,7 @@ function NotificationCard({
   time: string;
 }) {
   return (
-    <div className="bg-white border rounded-2xl p-5 shadow-sm flex items-start gap-4">
+    <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm flex items-start gap-4">
       {/* Icon circle */}
       <div className="p-3 bg-[#D6F2F8] rounded-xl flex items-center justify-center">
         {icon}

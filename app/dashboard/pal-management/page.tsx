@@ -32,7 +32,7 @@ export default function PetPalPage() {
 
   const pageNumbers = useMemo(
     () => Array.from({ length: totalPages }, (_, index) => index + 1),
-    [totalPages]
+    [totalPages],
   );
 
   return (
@@ -65,7 +65,7 @@ export default function PetPalPage() {
       </div>
 
       {/* TABLE */}
-      <div className="bg-white border rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
         <table className="w-full text-left">
           <thead className="bg-gray-50">
             <tr>
@@ -92,35 +92,26 @@ export default function PetPalPage() {
 
           <tbody>
             {status === "loading" ? (
-              <tr className="border-t">
-                <td
-                  colSpan={6}
-                  className="py-6 px-5 text-center text-gray-600"
-                >
+              <tr className="border-t border-gray-200">
+                <td colSpan={6} className="py-6 px-5 text-center text-gray-600">
                   Loading users...
                 </td>
               </tr>
             ) : status === "failed" ? (
-              <tr className="border-t">
-                <td
-                  colSpan={6}
-                  className="py-6 px-5 text-center text-red-600"
-                >
+              <tr className="border-t border-gray-200">
+                <td colSpan={6} className="py-6 px-5 text-center text-red-600">
                   {error ?? "Failed to load users."}
                 </td>
               </tr>
             ) : pagedUsers.length === 0 ? (
-              <tr className="border-t">
-                <td
-                  colSpan={6}
-                  className="py-6 px-5 text-center text-gray-600"
-                >
+              <tr className="border-t border-gray-200">
+                <td colSpan={6} className="py-6 px-5 text-center text-gray-600">
                   No users found.
                 </td>
               </tr>
             ) : (
               pagedUsers.map((item, index) => (
-                <tr key={item.id} className="border-t">
+                <tr key={item.id} className="border-t border-gray-200">
                   <td className="py-4 px-5 text-gray-700">
                     {(currentPage - 1) * pageSize + index + 1}
                   </td>
@@ -170,7 +161,7 @@ export default function PetPalPage() {
       {/* PAGINATION */}
       <div className="flex items-center gap-2">
         <button
-          className="p-2 border rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={() => setPage((prev) => Math.max(1, prev - 1))}
           disabled={currentPage === 1}
         >
@@ -180,7 +171,7 @@ export default function PetPalPage() {
         {pageNumbers.map((number) => (
           <button
             key={number}
-            className={`px-4 py-2 border rounded-lg ${
+            className={`px-4 py-2 border border-gray-200 rounded-lg ${
               number === currentPage
                 ? "bg-black text-white"
                 : "text-gray-700 hover:bg-gray-50"
@@ -192,7 +183,7 @@ export default function PetPalPage() {
         ))}
 
         <button
-          className="p-2 border rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
           disabled={currentPage === totalPages}
         >

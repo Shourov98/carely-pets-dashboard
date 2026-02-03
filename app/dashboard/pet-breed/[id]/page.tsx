@@ -13,7 +13,7 @@ export default function EditPetBreed() {
   const petTypeId = Array.isArray(params?.id) ? params.id[0] : params?.id;
   const dispatch = useAppDispatch();
   const { petTypes, status: petTypeStatus } = useAppSelector(
-    (state) => state.pet
+    (state) => state.pet,
   );
   const accessToken = useAppSelector((state) => state.auth.tokens?.accessToken);
   const [selectedType, setSelectedType] = useState(petTypeId ?? "");
@@ -73,7 +73,7 @@ export default function EditPetBreed() {
               "Content-Type": "application/json",
               Authorization: `Bearer ${accessToken}`,
             },
-          }
+          },
         );
 
         if (!response.ok) {
@@ -97,7 +97,7 @@ export default function EditPetBreed() {
           .map((breed: { name?: string }) => breed?.name)
           .filter(
             (name: string | undefined): name is string =>
-              typeof name === "string" && name.trim().length > 0
+              typeof name === "string" && name.trim().length > 0,
           );
         setBreeds(names);
         setBreedsStatus("succeeded");
@@ -105,11 +105,11 @@ export default function EditPetBreed() {
         setBreeds([]);
         setBreedsStatus("failed");
         setBreedsError(
-          err instanceof Error ? err.message : "Failed to fetch pet breeds."
+          err instanceof Error ? err.message : "Failed to fetch pet breeds.",
         );
       }
     },
-    [accessToken, normalizedBaseUrl]
+    [accessToken, normalizedBaseUrl],
   );
 
   useEffect(() => {
@@ -169,7 +169,7 @@ export default function EditPetBreed() {
             Authorization: `Bearer ${accessToken}`,
           },
           body: JSON.stringify({ breeds: trimmedBreeds }),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -192,7 +192,7 @@ export default function EditPetBreed() {
     } catch (err) {
       setSaveStatus("failed");
       setSaveError(
-        err instanceof Error ? err.message : "Failed to update pet breeds."
+        err instanceof Error ? err.message : "Failed to update pet breeds.",
       );
     }
   };
@@ -235,7 +235,7 @@ export default function EditPetBreed() {
       <div className="mt-8">
         <label className="text-xs font-medium text-gray-500">BREED</label>
 
-        <div className="bg-gray-50 w-full border rounded-xl min-h-[110px] mt-2 p-3">
+        <div className="bg-gray-50 w-full border border-gray-200 rounded-xl min-h-[110px] mt-2 p-3">
           {/* Breed Tags */}
           <div className="flex flex-wrap gap-2 mb-3">
             {breedsStatus === "loading" && (
@@ -268,7 +268,7 @@ export default function EditPetBreed() {
           </div>
 
           {/* Add Breed Input */}
-          <div className="flex items-center justify-between border-t pt-3">
+          <div className="flex items-center justify-between border-t border-gray-200 pt-3">
             <input
               value={breedInput}
               onChange={(e) => setBreedInput(e.target.value)}

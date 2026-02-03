@@ -35,13 +35,16 @@ export default function TermsConditionsPage() {
     setStatus("loading");
     setError(null);
     try {
-      const response = await fetch(`${normalizedBaseUrl}/admin/settings/terms`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
+      const response = await fetch(
+        `${normalizedBaseUrl}/admin/settings/terms`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
         },
-      });
+      );
 
       if (!response.ok) {
         let message = "Failed to fetch terms & conditions.";
@@ -63,7 +66,9 @@ export default function TermsConditionsPage() {
     } catch (err) {
       setStatus("failed");
       setError(
-        err instanceof Error ? err.message : "Failed to fetch terms & conditions.",
+        err instanceof Error
+          ? err.message
+          : "Failed to fetch terms & conditions.",
       );
     }
   }, [accessToken, normalizedBaseUrl]);
@@ -89,14 +94,17 @@ export default function TermsConditionsPage() {
     setSaveStatus("loading");
     setSaveError(null);
     try {
-      const response = await fetch(`${normalizedBaseUrl}/admin/settings/terms`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
+      const response = await fetch(
+        `${normalizedBaseUrl}/admin/settings/terms`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({ content }),
         },
-        body: JSON.stringify({ content }),
-      });
+      );
 
       if (!response.ok) {
         let message = "Failed to save terms & conditions.";
@@ -116,7 +124,9 @@ export default function TermsConditionsPage() {
     } catch (err) {
       setSaveStatus("failed");
       setSaveError(
-        err instanceof Error ? err.message : "Failed to save terms & conditions.",
+        err instanceof Error
+          ? err.message
+          : "Failed to save terms & conditions.",
       );
     }
   };
@@ -138,11 +148,11 @@ export default function TermsConditionsPage() {
       </div>
 
       {status === "loading" ? (
-        <div className="bg-white border rounded-xl p-6 text-gray-600">
+        <div className="bg-white border border-gray-200 rounded-xl p-6 text-gray-600">
           Loading terms & conditions...
         </div>
       ) : status === "failed" ? (
-        <div className="bg-white border rounded-xl p-6 text-red-600">
+        <div className="bg-white border border-gray-200 rounded-xl p-6 text-red-600">
           {error ?? "Failed to load terms & conditions."}
         </div>
       ) : (

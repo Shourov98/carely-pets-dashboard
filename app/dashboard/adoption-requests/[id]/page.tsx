@@ -75,7 +75,7 @@ export default function AdoptionRequestDetailPage() {
               <MoreHorizontal className="h-5 w-5 text-gray-700" />
             </button>
             {actionOpen && (
-              <div className="absolute right-0 mt-2 w-44 bg-white shadow-lg rounded-xl border z-20">
+              <div className="absolute right-0 mt-2 w-44 bg-white shadow-lg rounded-xl border border-gray-200 z-20">
                 <button
                   className="w-full px-4 py-2 text-left hover:bg-gray-50 text-gray-800"
                   disabled={updateStatus === "loading" || !requestId}
@@ -117,27 +117,27 @@ export default function AdoptionRequestDetailPage() {
       </div>
 
       {updateStatus === "failed" && updateError ? (
-        <div className="bg-white border rounded-xl p-4 text-sm text-red-600">
+        <div className="bg-white border border-gray-200 rounded-xl p-4 text-sm text-red-600">
           {updateError}
         </div>
       ) : null}
 
       {status === "loading" ? (
-        <div className="bg-white border rounded-xl p-6 text-gray-600">
+        <div className="bg-white border border-gray-200 rounded-xl p-6 text-gray-600">
           Loading request details...
         </div>
       ) : status === "failed" ? (
-        <div className="bg-white border rounded-xl p-6 text-red-600">
+        <div className="bg-white border border-gray-200 rounded-xl p-6 text-red-600">
           {error ?? "Failed to load request details."}
         </div>
       ) : !detail ? (
-        <div className="bg-white border rounded-xl p-6 text-gray-600">
+        <div className="bg-white border border-gray-200 rounded-xl p-6 text-gray-600">
           No request details found.
         </div>
       ) : (
         <>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="bg-white border rounded-2xl p-6 lg:col-span-2">
+            <div className="bg-white border border-gray-200 rounded-2xl p-6 lg:col-span-2">
               <h2 className="text-lg font-semibold text-gray-900">
                 Request Summary
               </h2>
@@ -165,10 +165,8 @@ export default function AdoptionRequestDetailPage() {
               </div>
             </div>
 
-            <div className="bg-white border rounded-2xl p-6">
-              <h2 className="text-lg font-semibold text-gray-900">
-                Customer
-              </h2>
+            <div className="bg-white border border-gray-200 rounded-2xl p-6">
+              <h2 className="text-lg font-semibold text-gray-900">Customer</h2>
               <div className="mt-4 space-y-3 text-sm text-gray-700">
                 <div>
                   <p className="text-xs text-gray-500">Name</p>
@@ -192,14 +190,14 @@ export default function AdoptionRequestDetailPage() {
             </div>
           </div>
 
-          <div className="bg-white border rounded-2xl p-6">
+          <div className="bg-white border border-gray-200 rounded-2xl p-6">
             <h2 className="text-lg font-semibold text-gray-900">
               Listing Details
             </h2>
             <div className="mt-4 grid grid-cols-1 lg:grid-cols-5 gap-6">
               <div className="lg:col-span-2">
                 {listing?.avatarUrl ? (
-                  <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden border">
+                  <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden border border-gray-200">
                     <Image
                       src={listing.avatarUrl}
                       alt={listing.petName ?? "Pet avatar"}
@@ -208,7 +206,7 @@ export default function AdoptionRequestDetailPage() {
                     />
                   </div>
                 ) : (
-                  <div className="w-full aspect-[4/3] rounded-2xl border bg-gray-50 flex items-center justify-center text-gray-400">
+                  <div className="w-full aspect-[4/3] rounded-2xl border border-gray-200 bg-gray-50 flex items-center justify-center text-gray-400">
                     No photo
                   </div>
                 )}

@@ -15,7 +15,7 @@ export default function SettingsPage() {
   const [taxError, setTaxError] = useState<string | null>(null);
   const [taxPercent, setTaxPercent] = useState("");
   const [originalTaxPercent, setOriginalTaxPercent] = useState<number | null>(
-    null
+    null,
   );
   const [servicesStatus, setServicesStatus] = useState<
     "idle" | "loading" | "succeeded" | "failed"
@@ -85,7 +85,7 @@ export default function SettingsPage() {
     } catch (err) {
       setTaxStatus("failed");
       setTaxError(
-        err instanceof Error ? err.message : "Failed to fetch tax settings."
+        err instanceof Error ? err.message : "Failed to fetch tax settings.",
       );
     }
   }, [accessToken, normalizedBaseUrl]);
@@ -123,7 +123,7 @@ export default function SettingsPage() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${accessToken}`,
           },
-        }
+        },
       );
 
       if (!response.ok) {
@@ -163,10 +163,10 @@ export default function SettingsPage() {
           const key = service.type.toLowerCase();
           if (key in nextServices) {
             nextServices[key as keyof typeof nextServices] = formatPrice(
-              service.price
+              service.price,
             );
           }
-        }
+        },
       );
 
       setServices(nextServices);
@@ -175,7 +175,7 @@ export default function SettingsPage() {
     } catch (err) {
       setServicesStatus("failed");
       setServicesError(
-        err instanceof Error ? err.message : "Failed to fetch service charges."
+        err instanceof Error ? err.message : "Failed to fetch service charges.",
       );
     }
   }, [accessToken, normalizedBaseUrl]);
@@ -236,7 +236,7 @@ export default function SettingsPage() {
     } catch (err) {
       setTaxStatus("failed");
       setTaxError(
-        err instanceof Error ? err.message : "Failed to update tax settings."
+        err instanceof Error ? err.message : "Failed to update tax settings.",
       );
     }
   };
@@ -316,7 +316,7 @@ export default function SettingsPage() {
               },
             ],
           }),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -356,10 +356,10 @@ export default function SettingsPage() {
           const key = service.type.toLowerCase();
           if (key in nextServices) {
             nextServices[key as keyof typeof nextServices] = formatPrice(
-              service.price
+              service.price,
             );
           }
-        }
+        },
       );
 
       setServices(nextServices);
@@ -369,7 +369,9 @@ export default function SettingsPage() {
     } catch (err) {
       setServicesStatus("failed");
       setServicesError(
-        err instanceof Error ? err.message : "Failed to update service charges."
+        err instanceof Error
+          ? err.message
+          : "Failed to update service charges.",
       );
     }
   };
@@ -389,7 +391,7 @@ export default function SettingsPage() {
       </div>
 
       {/* -------------------------------------- TAX SETTINGS -------------------------------------- */}
-      <div className="bg-white border rounded-2xl shadow-sm p-6 relative">
+      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 relative">
         <div className="flex justify-between items-center">
           <h2 className="text-lg font-semibold text-gray-900">
             Tax Percentage Settings
@@ -440,16 +442,14 @@ export default function SettingsPage() {
             />
           )}
 
-          {taxError && (
-            <p className="mt-3 text-sm text-red-600">{taxError}</p>
-          )}
+          {taxError && <p className="mt-3 text-sm text-red-600">{taxError}</p>}
 
           <hr className="mt-4" />
         </div>
       </div>
 
       {/* -------------------------------------- SERVICE CHARGE -------------------------------------- */}
-      <div className="bg-white border rounded-2xl shadow-sm p-6 relative">
+      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 relative">
         <div className="flex justify-between items-center">
           <h2 className="text-lg font-semibold text-gray-900">
             Services Charge

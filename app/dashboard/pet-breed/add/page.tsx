@@ -50,7 +50,7 @@ export default function AddPetBreed() {
       <div className="mt-8">
         <label className="text-xs font-medium text-gray-500">BREED</label>
 
-        <div className="bg-gray-50 w-full border rounded-xl min-h-[110px] mt-2 p-3">
+        <div className="bg-gray-50 w-full border border-gray-200 rounded-xl min-h-[110px] mt-2 p-3">
           {/* Breed Tags */}
           <div className="flex flex-wrap gap-2 mb-3">
             {breeds.length === 0 && (
@@ -74,7 +74,7 @@ export default function AddPetBreed() {
           </div>
 
           {/* Add Breed Input */}
-          <div className="flex items-center justify-between border-t pt-3">
+          <div className="flex items-center justify-between border-t border-gray-200 pt-3">
             <input
               value={breedInput}
               onChange={(e) => setBreedInput(e.target.value)}

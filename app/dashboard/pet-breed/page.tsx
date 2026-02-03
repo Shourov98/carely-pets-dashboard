@@ -39,7 +39,7 @@ export default function PetBreedPage() {
       </div>
 
       {/* TABLE */}
-      <div className="mt-4 bg-white border rounded-xl overflow-hidden shadow-sm">
+      <div className="mt-4 bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
         <table className="w-full text-left">
           <thead className="bg-gray-50 text-gray-700 text-sm border-b border-gray-300">
             <tr>
@@ -65,13 +65,15 @@ export default function PetBreedPage() {
                 </td>
               </tr>
             )}
-            {status !== "loading" && status !== "failed" && !petTypes.length && (
-              <tr>
-                <td className="py-6 px-5 text-center" colSpan={4}>
-                  No pet types found.
-                </td>
-              </tr>
-            )}
+            {status !== "loading" &&
+              status !== "failed" &&
+              !petTypes.length && (
+                <tr>
+                  <td className="py-6 px-5 text-center" colSpan={4}>
+                    No pet types found.
+                  </td>
+                </tr>
+              )}
             {petTypes.map((item, index) => (
               <tr key={item.id} className="border-b border-gray-300">
                 <td className="py-4 px-5">{index + 1}</td>

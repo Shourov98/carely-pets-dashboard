@@ -112,7 +112,7 @@ export default function Sidebar({ collapsed }: { collapsed: boolean }) {
 
   return (
     <aside
-      className={`h-screen bg-white border-r fixed left-0 top-0 transition-all duration-300 flex flex-col ${
+      className={`h-screen bg-white border-r border-gray-200 fixed left-0 top-0 transition-all duration-300 flex flex-col ${
         collapsed ? "w-20" : "w-64"
       }`}
     >

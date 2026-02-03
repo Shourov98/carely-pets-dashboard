@@ -189,7 +189,7 @@ export default function PetOwnerDetails() {
       </div>
 
       {/* ---- TABS ---- */}
-      <div className="border-b">
+      <div className="border-b border-gray-200">
         <div className="flex items-center gap-8">
           {tabs.map((t) => (
             <button
@@ -211,129 +211,129 @@ export default function PetOwnerDetails() {
       {activeTab === "Profile" && (
         <div className="space-y-10">
           {status === "loading" ? (
-            <div className="bg-white border rounded-xl p-6 text-gray-600">
+            <div className="bg-white border border-gray-200 rounded-xl p-6 text-gray-600">
               Loading profile...
             </div>
           ) : status === "failed" ? (
-            <div className="bg-white border rounded-xl p-6 text-red-600">
+            <div className="bg-white border border-gray-200 rounded-xl p-6 text-red-600">
               {error ?? "Failed to load profile."}
             </div>
           ) : !profile ? (
-            <div className="bg-white border rounded-xl p-6 text-gray-600">
+            <div className="bg-white border border-gray-200 rounded-xl p-6 text-gray-600">
               No profile data found.
             </div>
           ) : (
             <>
-          {/* USER HEADER */}
-          <div className="flex items-center gap-6">
-            {profile.avatarUrl ? (
-              <Image
-                src={profile.avatarUrl}
-                width={90}
-                height={90}
-                className="rounded-full object-cover"
-                alt="avatar"
-              />
-            ) : (
-              <div className="w-[90px] h-[90px] rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
-                <User className="h-8 w-8" />
+              {/* USER HEADER */}
+              <div className="flex items-center gap-6">
+                {profile.avatarUrl ? (
+                  <Image
+                    src={profile.avatarUrl}
+                    width={90}
+                    height={90}
+                    className="rounded-full object-cover"
+                    alt="avatar"
+                  />
+                ) : (
+                  <div className="w-[90px] h-[90px] rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
+                    <User className="h-8 w-8" />
+                  </div>
+                )}
+
+                <div>
+                  <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm flex items-center w-fit gap-2">
+                    {profile.status ?? "N/A"}
+                    <span className="h-2 w-2 bg-green-600 rounded-full" />
+                  </span>
+
+                  <h2 className="text-xl text-gray-800 mt-2">
+                    {profile.name ?? "N/A"}
+                  </h2>
+                  <p className="text-gray-600">
+                    {profile.username ? `@${profile.username}` : "N/A"}
+                  </p>
+                </div>
               </div>
-            )}
 
-            <div>
-              <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm flex items-center w-fit gap-2">
-                {profile.status ?? "N/A"}
-                <span className="h-2 w-2 bg-green-600 rounded-full" />
-              </span>
+              {/* REPORT SUMMARY GRID */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* REPORT COUNT */}
+                <div className="p-6 rounded-xl bg-gray-50 border border-gray-200 flex justify-between items-center">
+                  <div>
+                    <p className="text-xs text-gray-500 font-semibold">
+                      REPORT COUNT
+                    </p>
+                    <p className="text-2xl text-gray-800 font-bold mt-1">
+                      {profile.reportCount ?? 0}
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center">
+                    №
+                  </div>
+                </div>
 
-              <h2 className="text-xl text-gray-800 mt-2">
-                {profile.name ?? "N/A"}
-              </h2>
-              <p className="text-gray-600">
-                {profile.username ? `@${profile.username}` : "N/A"}
-              </p>
-            </div>
-          </div>
-
-          {/* REPORT SUMMARY GRID */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* REPORT COUNT */}
-            <div className="p-6 rounded-xl bg-gray-50 border flex justify-between items-center">
-              <div>
-                <p className="text-xs text-gray-500 font-semibold">
-                  REPORT COUNT
-                </p>
-                <p className="text-2xl text-gray-800 font-bold mt-1">
-                  {profile.reportCount ?? 0}
-                </p>
+                {/* REPORT ON POST */}
+                <div className="p-6 rounded-xl bg-gray-50 border border-gray-200 flex justify-between items-center">
+                  <div>
+                    <p className="text-xs text-gray-500 font-semibold">
+                      REPORT ON POST
+                    </p>
+                    <p className="text-2xl text-gray-800 font-bold mt-1">
+                      {profile.reportOnPostCount ?? 0}
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center">
+                    !
+                  </div>
+                </div>
               </div>
-              <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center">
-                №
+
+              {/* INFO GRID */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div>
+                  <p className="text-xs text-gray-500">EMAIL</p>
+                  <p className="text-gray-800 font-medium border-b pb-2 mt-1">
+                    {profile.email ?? "N/A"}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs text-gray-500">PHONE</p>
+                  <p className="text-gray-800 font-medium border-b pb-2 mt-1">
+                    {profile.phone ?? "N/A"}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs text-gray-500">ADDRESS</p>
+                  <p className="text-gray-800 font-medium border-b pb-2 mt-1">
+                    {profile.address ?? "N/A"}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs text-gray-500">COUNTRY</p>
+                  <p className="text-gray-800 font-medium border-b pb-2 mt-1">
+                    {profile.country ?? "N/A"}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs text-gray-500">JOINING DATE</p>
+                  <p className="text-gray-800 font-medium border-b pb-2 mt-1">
+                    {displayJoinDate}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs text-gray-500">
+                    DELETION (30 days timeline)
+                  </p>
+                  <p className="text-red-500 font-medium border-b pb-2 mt-1">
+                    {deletionLabel}
+                  </p>
+                </div>
               </div>
-            </div>
-
-            {/* REPORT ON POST */}
-            <div className="p-6 rounded-xl bg-gray-50 border flex justify-between items-center">
-              <div>
-                <p className="text-xs text-gray-500 font-semibold">
-                  REPORT ON POST
-                </p>
-                <p className="text-2xl text-gray-800 font-bold mt-1">
-                  {profile.reportOnPostCount ?? 0}
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center">
-                !
-              </div>
-            </div>
-          </div>
-
-          {/* INFO GRID */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-            <div>
-              <p className="text-xs text-gray-500">EMAIL</p>
-              <p className="text-gray-800 font-medium border-b pb-2 mt-1">
-                {profile.email ?? "N/A"}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-xs text-gray-500">PHONE</p>
-              <p className="text-gray-800 font-medium border-b pb-2 mt-1">
-                {profile.phone ?? "N/A"}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-xs text-gray-500">ADDRESS</p>
-              <p className="text-gray-800 font-medium border-b pb-2 mt-1">
-                {profile.address ?? "N/A"}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-xs text-gray-500">COUNTRY</p>
-              <p className="text-gray-800 font-medium border-b pb-2 mt-1">
-                {profile.country ?? "N/A"}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-xs text-gray-500">JOINING DATE</p>
-              <p className="text-gray-800 font-medium border-b pb-2 mt-1">
-                {displayJoinDate}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-xs text-gray-500">
-                DELETION (30 days timeline)
-              </p>
-              <p className="text-red-500 font-medium border-b pb-2 mt-1">
-                {deletionLabel}
-              </p>
-            </div>
-          </div>
             </>
           )}
         </div>
@@ -343,64 +343,64 @@ export default function PetOwnerDetails() {
       {activeTab === "Pets" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-8">
           {status === "loading" ? (
-            <div className="bg-white border rounded-xl p-6 text-gray-600">
+            <div className="bg-white border border-gray-200 rounded-xl p-6 text-gray-600">
               Loading pets...
             </div>
           ) : status === "failed" ? (
-            <div className="bg-white border rounded-xl p-6 text-red-600">
+            <div className="bg-white border border-gray-200 rounded-xl p-6 text-red-600">
               {error ?? "Failed to load pets."}
             </div>
           ) : pets.length === 0 ? (
-            <div className="bg-white border rounded-xl p-6 text-gray-600">
+            <div className="bg-white border border-gray-200 rounded-xl p-6 text-gray-600">
               No pets found.
             </div>
           ) : (
             pets.map((p) => (
-            <div
-              key={p.id}
-              className="rounded-xl bg-white border shadow-sm overflow-hidden"
-            >
-              {p.avatarUrl ? (
-                <img
-                  src={p.avatarUrl}
-                  className="w-full h-52 object-cover"
-                  alt={p.name}
-                />
-              ) : (
-                <div className="w-full h-52 bg-gray-100 flex items-center justify-center text-gray-400">
-                  <User className="h-8 w-8" />
-                </div>
-              )}
+              <div
+                key={p.id}
+                className="rounded-xl bg-white border border-gray-200 shadow-sm overflow-hidden"
+              >
+                {p.avatarUrl ? (
+                  <img
+                    src={p.avatarUrl}
+                    className="w-full h-52 object-cover"
+                    alt={p.name}
+                  />
+                ) : (
+                  <div className="w-full h-52 bg-gray-100 flex items-center justify-center text-gray-400">
+                    <User className="h-8 w-8" />
+                  </div>
+                )}
 
-              <div className="p-4 space-y-2">
-                <div className="flex justify-between items-start">
-                  <p className="font-semibold text-gray-800">
-                    {p.name} {p.id}
+                <div className="p-4 space-y-2">
+                  <div className="flex justify-between items-start">
+                    <p className="font-semibold text-gray-800">
+                      {p.name} {p.id}
+                    </p>
+
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs ${
+                        p.gender?.toLowerCase() === "female"
+                          ? "bg-pink-100 text-pink-600"
+                          : "bg-blue-100 text-blue-600"
+                      }`}
+                    >
+                      {p.gender ?? "N/A"}
+                    </span>
+                  </div>
+
+                  <p className="text-sm text-gray-800">
+                    {p.type} • {p.age} year{p.age === 1 ? "" : "s"}
                   </p>
 
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs ${
-                      p.gender?.toLowerCase() === "female"
-                        ? "bg-pink-100 text-pink-600"
-                        : "bg-blue-100 text-blue-600"
-                    }`}
+                  <Link
+                    href={`/dashboard/pal-management/${id}/pet/${p.id}`}
+                    className="block w-full text-center mt-3 py-2 rounded-lg bg-[#D6F2F8] hover:bg-[#c9edf5] text-gray-800 font-medium"
                   >
-                    {p.gender ?? "N/A"}
-                  </span>
+                    Pet Facts
+                  </Link>
                 </div>
-
-                <p className="text-sm text-gray-800">
-                  {p.type} • {p.age} year{p.age === 1 ? "" : "s"}
-                </p>
-
-                <Link
-                  href={`/dashboard/pal-management/${id}/pet/${p.id}`}
-                  className="block w-full text-center mt-3 py-2 rounded-lg bg-[#D6F2F8] hover:bg-[#c9edf5] text-gray-800 font-medium"
-                >
-                  Pet Facts
-                </Link>
               </div>
-            </div>
             ))
           )}
         </div>
@@ -410,15 +410,15 @@ export default function PetOwnerDetails() {
       {activeTab === "Service" && (
         <div className="space-y-4">
           {status === "loading" ? (
-            <div className="bg-white border rounded-xl p-6 text-gray-600">
+            <div className="bg-white border border-gray-200 rounded-xl p-6 text-gray-600">
               Loading services...
             </div>
           ) : status === "failed" ? (
-            <div className="bg-white border rounded-xl p-6 text-red-600">
+            <div className="bg-white border border-gray-200 rounded-xl p-6 text-red-600">
               {error ?? "Failed to load services."}
             </div>
           ) : services.length === 0 ? (
-            <div className="bg-white border rounded-xl p-6 text-gray-600">
+            <div className="bg-white border border-gray-200 rounded-xl p-6 text-gray-600">
               No services found.
             </div>
           ) : (
@@ -453,7 +453,7 @@ export default function PetOwnerDetails() {
               return (
                 <div
                   key={s.id}
-                  className="bg-white border rounded-xl shadow-sm overflow-hidden"
+                  className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden"
                 >
                   {/* Accordion Header */}
                   <button
@@ -508,7 +508,7 @@ export default function PetOwnerDetails() {
                     </div>
 
                     {/* CUSTOMER INFO */}
-                    <div className="p-5 border rounded-xl mb-6">
+                    <div className="p-5 border border-gray-200 rounded-xl mb-6">
                       <div className="flex justify-between items-center mb-4">
                         <p className="text-gray-800 font-semibold">
                           Customer Information
@@ -552,7 +552,7 @@ export default function PetOwnerDetails() {
                     </div>
 
                     {/* SERVICE DETAILS */}
-                    <div className="p-5 border rounded-xl mb-6 space-y-5">
+                    <div className="p-5 border border-gray-200 rounded-xl mb-6 space-y-5">
                       <DetailRow
                         label="SERVICE"
                         value={serviceName}
@@ -576,7 +576,7 @@ export default function PetOwnerDetails() {
                     </div>
 
                     {/* ORDER SUMMARY */}
-                    <div className="p-5 border rounded-xl">
+                    <div className="p-5 border border-gray-200 rounded-xl">
                       <p className="text-gray-800 font-semibold mb-4">
                         Order Summary
                       </p>
@@ -667,7 +667,7 @@ function ServiceDetailRow({
   };
 }) {
   return (
-    <div className="flex items-start justify-between bg-white border rounded-xl p-6 shadow-sm">
+    <div className="flex items-start justify-between bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
       {/* LEFT — ICON + TEXT */}
       <div className="flex items-start gap-4">
         {/* Icon */}

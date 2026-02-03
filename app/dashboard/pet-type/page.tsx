@@ -10,9 +10,8 @@ import { deletePetType, fetchPetTypes } from "../../store/petSlice";
 export default function PetTypePage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { petTypes, status, error, 
-    deleteStatus } = useAppSelector(
-    (state) => state.pet
+  const { petTypes, status, error, deleteStatus } = useAppSelector(
+    (state) => state.pet,
   );
 
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
@@ -34,9 +33,7 @@ export default function PetTypePage() {
         return;
       }
 
-      const isInsideMenu = target.closest(
-        `[data-menu-root="${menuOpen}"]`
-      );
+      const isInsideMenu = target.closest(`[data-menu-root="${menuOpen}"]`);
       if (!isInsideMenu) {
         setMenuOpen(null);
       }
@@ -69,7 +66,7 @@ export default function PetTypePage() {
       </div>
 
       {/* Table */}
-      <div className="mt-4 bg-white border rounded-xl shadow-sm">
+      <div className="mt-4 bg-white border border-gray-200 rounded-xl shadow-sm">
         <table className="w-full text-left">
           <thead className="text-gray-600 bg-gray-50 text-sm">
             <tr>

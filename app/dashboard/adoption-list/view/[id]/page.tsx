@@ -253,9 +253,7 @@ export default function ViewPetPage() {
     } catch (err) {
       setStatus("failed");
       setError(
-        err instanceof Error
-          ? err.message
-          : "Failed to fetch adoption detail.",
+        err instanceof Error ? err.message : "Failed to fetch adoption detail.",
       );
       return false;
     }
@@ -473,7 +471,7 @@ export default function ViewPetPage() {
           console.log(key, value);
         }
       }
-      
+
       const healthResponse = await fetch(
         `${normalizedBaseUrl}/admin/adoptions/${listingId}/health-records`,
         {
@@ -586,22 +584,10 @@ export default function ViewPetPage() {
 
       {/* PET MAIN DETAILS */}
       {petData && status !== "failed" && (
-        <div className="grid md:grid-cols-3 gap-6 bg-none border-t mt-6 pt-6">
-          <Detail
-            icon="🐶"
-            title="TYPE"
-            value={petData.species ?? "N/A"}
-          />
-          <Detail
-            icon="♂️"
-            title="GENDER"
-            value={petData.gender ?? "N/A"}
-          />
-          <Detail
-            icon="🐕"
-            title="BREED"
-            value={petData.breed ?? "N/A"}
-          />
+        <div className="grid md:grid-cols-3 gap-6 bg-none border-t border-gray-400 mt-6 pt-6">
+          <Detail icon="🐶" title="TYPE" value={petData.species ?? "N/A"} />
+          <Detail icon="♂️" title="GENDER" value={petData.gender ?? "N/A"} />
+          <Detail icon="🐕" title="BREED" value={petData.breed ?? "N/A"} />
 
           <Detail
             icon="🎓"
@@ -667,14 +653,14 @@ export default function ViewPetPage() {
         <div className="mt-10">
           <h3 className="text-lg font-semibold text-gray-900">Pet Snaps</h3>
 
-          <div className="mt-4 border rounded-xl bg-white">
+          <div className="mt-4 border border-gray-200 rounded-xl bg-white">
             {photos.length ? (
               photos.map((photo, index) => {
                 const name = getFileName(photo);
                 return (
                   <div
                     key={`${photo}-${index}`}
-                    className="flex items-center justify-between px-4 py-4 border-b last:border-0"
+                    className="flex items-center justify-between px-4 py-4 border-b border-gray-200 last:border-0"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
@@ -729,13 +715,11 @@ export default function ViewPetPage() {
             return (
               <div
                 key={recordType.label}
-                className="bg-gray-50 border border-gray-100 rounded-2xl p-4"
+                className="bg-gray-50 border border-gray-200 rounded-2xl p-4"
               >
                 <div className="flex items-start justify-between">
                   <div className="p-3">
-                    <p className="text-xs text-gray-500">
-                      {recordType.label}
-                    </p>
+                    <p className="text-xs text-gray-500">{recordType.label}</p>
                     <p className="text-2xl font-semibold text-gray-900 mt-1">
                       {recordCounts[recordType.label] ?? 0}
                     </p>

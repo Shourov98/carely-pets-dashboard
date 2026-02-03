@@ -38,7 +38,9 @@ export default function AdoptRequestsPage() {
   const filtered = useMemo(() => {
     if (statusFilter === "All") return requests;
     const target =
-      statusFilter === "Not Delivered" ? "not_delivered" : statusFilter.toLowerCase();
+      statusFilter === "Not Delivered"
+        ? "not_delivered"
+        : statusFilter.toLowerCase();
     return requests.filter(
       (request) => request.status?.toLowerCase() === target,
     );
@@ -88,14 +90,14 @@ export default function AdoptRequestsPage() {
         {/* STATUS FILTER */}
         <div className="relative" data-menu-root>
           <button
-            className="px-4 py-2 border-0 rounded-xl text-gray-800 bg-[#00a7c7]/30 flex items-center gap-2"
+            className="px-4 py-2 border-0 border-gray-200 rounded-xl text-gray-800 bg-[#00a7c7]/30 flex items-center gap-2"
             onClick={() => setMenuOpen(menuOpen === "filter" ? null : "filter")}
           >
             Status ▾
           </button>
 
           {menuOpen === "filter" && (
-            <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-xl border z-20">
+            <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-xl border border-gray-200 z-20">
               <button
                 onClick={() => {
                   setStatusFilter("Pending");
@@ -129,7 +131,7 @@ export default function AdoptRequestsPage() {
                   setStatusFilter("All");
                   setMenuOpen(null);
                 }}
-                className="w-full text-left px-4 py-2 hover:bg-gray-50 text-gray-800 border-t"
+                className="w-full text-left px-4 py-2 hover:bg-gray-50 text-gray-800 border-t border-gray-200"
               >
                 Show All
               </button>
@@ -139,7 +141,7 @@ export default function AdoptRequestsPage() {
       </div>
 
       {/* TABLE */}
-      <div className="mt-6 bg-white border rounded-xl overflow-visible">
+      <div className="mt-6 bg-white border border-gray-200 rounded-xl overflow-visible">
         <table className="w-full">
           <thead className="bg-gray-50 text-gray-700 text-left text-sm font-medium">
             <tr>
@@ -155,131 +157,124 @@ export default function AdoptRequestsPage() {
 
           <tbody>
             {fetchStatus === "loading" ? (
-              <tr className="border-t">
-                <td
-                  colSpan={7}
-                  className="py-6 px-5 text-center text-gray-600"
-                >
+              <tr className="border-t border-gray-200">
+                <td colSpan={7} className="py-6 px-5 text-center text-gray-600">
                   Loading adoption requests...
                 </td>
               </tr>
             ) : fetchStatus === "failed" ? (
-              <tr className="border-t">
-                <td
-                  colSpan={7}
-                  className="py-6 px-5 text-center text-red-600"
-                >
+              <tr className="border-t border-gray-200">
+                <td colSpan={7} className="py-6 px-5 text-center text-red-600">
                   {fetchError ?? "Failed to load adoption requests."}
                 </td>
               </tr>
             ) : filtered.length === 0 ? (
-              <tr className="border-t">
-                <td
-                  colSpan={7}
-                  className="py-6 px-5 text-center text-gray-600"
-                >
+              <tr className="border-t border-gray-200">
+                <td colSpan={7} className="py-6 px-5 text-center text-gray-600">
                   No adoption requests found.
                 </td>
               </tr>
             ) : (
               filtered.map((item, idx) => (
-              <tr
-                key={item.id}
-                className="border-t border-gray-300 text-gray-800"
-              >
-                <td className="py-4 px-6">{idx + 1}</td>
-                <td className="py-4 px-6">
-                  {item.customerName?.trim() ? item.customerName : "N/A"}
-                </td>
-                <td className="py-4 px-6">{item.petType}</td>
-                <td className="py-4 px-6">{item.petBreed}</td>
-                <td className="py-4 px-6">
-                  {item.petAge} year{item.petAge === 1 ? "" : "s"}
-                </td>
+                <tr
+                  key={item.id}
+                  className="border-t border-gray-300 text-gray-800"
+                >
+                  <td className="py-4 px-6">{idx + 1}</td>
+                  <td className="py-4 px-6">
+                    {item.customerName?.trim() ? item.customerName : "N/A"}
+                  </td>
+                  <td className="py-4 px-6">{item.petType}</td>
+                  <td className="py-4 px-6">{item.petBreed}</td>
+                  <td className="py-4 px-6">
+                    {item.petAge} year{item.petAge === 1 ? "" : "s"}
+                  </td>
 
-                {/* STATUS */}
-                <td className="py-4 px-6">
-                  {item.status?.toLowerCase() === "pending" ? (
-                    <span className="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full flex items-center gap-1 w-fit">
-                      Pending
-                      <span className="h-2 w-2 bg-yellow-500 rounded-full" />
-                    </span>
-                  ) : item.status?.toLowerCase() === "not_delivered" ? (
-                    <span className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-full flex items-center gap-1 w-fit">
-                      Not Delivered
-                      <span className="h-2 w-2 bg-red-500 rounded-full" />
-                    </span>
-                  ) : (
-                    <span className="px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full flex items-center gap-1 w-fit">
-                      Delivered
-                      <span className="h-2 w-2 bg-green-500 rounded-full" />
-                    </span>
-                  )}
-                </td>
-
-                {/* ACTION MENU */}
-                <td className="py-4 px-6 relative" data-menu-root>
-                  <button
-                    onClick={() =>
-                      setMenuOpen(menuOpen === item.id ? null : item.id)
-                    }
-                    className="p-2 rounded-lg hover:bg-gray-100"
-                  >
-                    <MoreHorizontal className="h-5 w-5 text-gray-700" />
-                  </button>
-
-                  {menuOpen === item.id && (
-                    <div className="absolute right-6 mt-2 w-40 bg-white shadow-lg rounded-xl border-0 z-20">
-                      <button
-                        onClick={() =>
-                          router.push(`/dashboard/adoption-requests/${item.id}`)
-                        }
-                        className="w-full px-4 py-2 text-left hover:bg-gray-50 text-gray-800"
-                      >
-                        View
-                      </button>
-
-                      <button
-                        className="w-full px-4 py-2 text-left hover:bg-gray-50 text-red-600"
-                        disabled={deleteStatus === "loading"}
-                        onClick={() => {
-                          setSelectedId(item.id);
-                          setDeleteModal(true);
-                          setMenuOpen(null);
-                        }}
-                      >
-                        Delete
-                      </button>
-
-                      <div className="border-t px-4 py-2 text-xs text-gray-500">
-                        ACTION
-                      </div>
-
-                      <button
-                        className="w-full px-4 py-2 text-left hover:bg-gray-50 text-gray-800"
-                        disabled={updateStatus === "loading"}
-                        onClick={async () => {
-                          setMenuOpen(null);
-                          await updateRequestStatus(item.id, "delivered");
-                        }}
-                      >
-                        Delivered
-                      </button>
-                      <button
-                        className="w-full px-4 py-2 text-left hover:bg-gray-50 text-gray-800"
-                        disabled={updateStatus === "loading"}
-                        onClick={async () => {
-                          setMenuOpen(null);
-                          await updateRequestStatus(item.id, "not_delivered");
-                        }}
-                      >
+                  {/* STATUS */}
+                  <td className="py-4 px-6">
+                    {item.status?.toLowerCase() === "pending" ? (
+                      <span className="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full flex items-center gap-1 w-fit">
+                        Pending
+                        <span className="h-2 w-2 bg-yellow-500 rounded-full" />
+                      </span>
+                    ) : item.status?.toLowerCase() === "not_delivered" ? (
+                      <span className="px-3 py-1 bg-red-100 text-red-700 text-xs rounded-full flex items-center gap-1 w-fit">
                         Not Delivered
-                      </button>
-                    </div>
-                  )}
-                </td>
-              </tr>
-            ))
+                        <span className="h-2 w-2 bg-red-500 rounded-full" />
+                      </span>
+                    ) : (
+                      <span className="px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full flex items-center gap-1 w-fit">
+                        Delivered
+                        <span className="h-2 w-2 bg-green-500 rounded-full" />
+                      </span>
+                    )}
+                  </td>
+
+                  {/* ACTION MENU */}
+                  <td className="py-4 px-6 relative" data-menu-root>
+                    <button
+                      onClick={() =>
+                        setMenuOpen(menuOpen === item.id ? null : item.id)
+                      }
+                      className="p-2 rounded-lg hover:bg-gray-100"
+                    >
+                      <MoreHorizontal className="h-5 w-5 text-gray-700" />
+                    </button>
+
+                    {menuOpen === item.id && (
+                      <div className="absolute right-6 mt-2 w-40 bg-white shadow-lg rounded-xl border-0 border-gray-200 z-20">
+                        <button
+                          onClick={() =>
+                            router.push(
+                              `/dashboard/adoption-requests/${item.id}`,
+                            )
+                          }
+                          className="w-full px-4 py-2 text-left hover:bg-gray-50 text-gray-800"
+                        >
+                          View
+                        </button>
+
+                        <button
+                          className="w-full px-4 py-2 text-left hover:bg-gray-50 text-red-600"
+                          disabled={deleteStatus === "loading"}
+                          onClick={() => {
+                            setSelectedId(item.id);
+                            setDeleteModal(true);
+                            setMenuOpen(null);
+                          }}
+                        >
+                          Delete
+                        </button>
+
+                        <div className="border-t border-gray-200 px-4 py-2 text-xs text-gray-500">
+                          ACTION
+                        </div>
+
+                        <button
+                          className="w-full px-4 py-2 text-left hover:bg-gray-50 text-gray-800"
+                          disabled={updateStatus === "loading"}
+                          onClick={async () => {
+                            setMenuOpen(null);
+                            await updateRequestStatus(item.id, "delivered");
+                          }}
+                        >
+                          Delivered
+                        </button>
+                        <button
+                          className="w-full px-4 py-2 text-left hover:bg-gray-50 text-gray-800"
+                          disabled={updateStatus === "loading"}
+                          onClick={async () => {
+                            setMenuOpen(null);
+                            await updateRequestStatus(item.id, "not_delivered");
+                          }}
+                        >
+                          Not Delivered
+                        </button>
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              ))
             )}
           </tbody>
         </table>

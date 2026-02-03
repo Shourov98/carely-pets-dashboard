@@ -280,7 +280,7 @@ export default function ServiceManagementPage() {
           </button>
 
           {openStatusMenu && (
-            <div className="absolute right-0 mt-2 bg-white shadow-md rounded-xl w-40 border z-20">
+            <div className="absolute right-0 mt-2 bg-white shadow-md rounded-xl w-40 border border-gray-200 z-20">
               {["All", "Pending", "Completed"].map((status) => (
                 <button
                   key={status}
@@ -299,7 +299,7 @@ export default function ServiceManagementPage() {
       </div>
 
       {/* TABLE */}
-      <div className="mt-4 bg-white border rounded-xl shadow-sm overflow-visible">
+      <div className="mt-4 bg-white border border-gray-200 rounded-xl shadow-sm overflow-visible">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-gray-700">
             <tr>
@@ -316,19 +316,19 @@ export default function ServiceManagementPage() {
 
           <tbody>
             {status === "loading" ? (
-              <tr className="border-t">
+              <tr className="border-t border-gray-200">
                 <td colSpan={8} className="p-6 text-center text-gray-600">
                   Loading services...
                 </td>
               </tr>
             ) : status === "failed" ? (
-              <tr className="border-t">
+              <tr className="border-t border-gray-200">
                 <td colSpan={8} className="p-6 text-center text-red-600">
                   {error ?? "Failed to load services."}
                 </td>
               </tr>
             ) : filteredData.length === 0 ? (
-              <tr className="border-t">
+              <tr className="border-t border-gray-200">
                 <td colSpan={8} className="p-6 text-center text-gray-600">
                   No services found.
                 </td>
@@ -337,7 +337,7 @@ export default function ServiceManagementPage() {
               filteredData.map((item, idx) => {
                 const statusValue = item.status?.toLowerCase();
                 return (
-                  <tr key={item.id} className="border-t">
+                  <tr key={item.id} className="border-t border-gray-200">
                     <td className="p-4 text-gray-700">
                       {(page - 1) * pageSize + idx + 1}
                     </td>
@@ -376,7 +376,7 @@ export default function ServiceManagementPage() {
                         </button>
 
                         {openActionMenuId === item.id && (
-                          <div className="absolute right-0 mt-2 w-48 bg-white border shadow-lg rounded-xl z-30">
+                          <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 shadow-lg rounded-xl z-30">
                             <button
                               onClick={() => {
                                 setOpenActionMenuId(null);
@@ -396,7 +396,7 @@ export default function ServiceManagementPage() {
                               Delete
                             </button>
 
-                            <div className="border-t my-1"></div>
+                            <div className="border-t border-gray-200 my-1"></div>
 
                             <p className="px-4 pt-1 text-xs text-gray-500">
                               ACTION
@@ -435,17 +435,17 @@ export default function ServiceManagementPage() {
       {/* PAGINATION */}
       <div className="flex items-center gap-2 mt-4">
         <button
-          className="border px-2 py-1 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          className="border border-gray-400 px-2 py-1 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={() => setPage((prev) => Math.max(1, prev - 1))}
           disabled={page === 1}
         >
           &lt;
         </button>
-        <button className="border px-2 py-1 rounded-lg bg-gray-900 text-white">
+        <button className="border border-gray-200 px-2 py-1 rounded-lg bg-gray-900 text-white">
           {page}
         </button>
         <button
-          className="border px-2 py-1 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          className="border border-gray-400 px-2 py-1 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={() =>
             setPage((prev) =>
               Math.min(prev + 1, Math.max(1, Math.ceil(total / pageSize))),

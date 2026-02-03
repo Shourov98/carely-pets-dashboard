@@ -44,15 +44,10 @@ const monthLabels = [
   "DEC",
 ];
 
-
 export default function DashboardPage() {
   const today = new Date();
-  const [selectedMonth, setSelectedMonth] = useState(
-    months[today.getMonth()],
-  );
-  const [selectedYear, setSelectedYear] = useState(
-    String(today.getFullYear()),
-  );
+  const [selectedMonth, setSelectedMonth] = useState(months[today.getMonth()]);
+  const [selectedYear, setSelectedYear] = useState(String(today.getFullYear()));
   const [revenueYear, setRevenueYear] = useState(String(today.getFullYear()));
   const [userMetricYear, setUserMetricYear] = useState(
     String(today.getFullYear()),
@@ -130,7 +125,9 @@ export default function DashboardPage() {
         setRevenueStatus("idle");
       } catch (err) {
         setRevenueError(
-          err instanceof Error ? err.message : "Failed to fetch revenue metric.",
+          err instanceof Error
+            ? err.message
+            : "Failed to fetch revenue metric.",
         );
         setRevenueStatus("failed");
       }
@@ -265,7 +262,7 @@ export default function DashboardPage() {
       </div>
 
       {/* REVENUE METRIC */}
-      <div className="bg-white border rounded-2xl p-6 shadow-sm space-y-4">
+      <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-4">
         {/* Header */}
         <div className="flex items-center bg-neutral-50 justify-between">
           <div>
@@ -294,7 +291,11 @@ export default function DashboardPage() {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={revenueChart}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" tick={{ fontSize: 12 }} axisLine={false} />
+                <XAxis
+                  dataKey="name"
+                  tick={{ fontSize: 12 }}
+                  axisLine={false}
+                />
                 <YAxis tick={{ fontSize: 12 }} axisLine={false} />
                 <Tooltip />
                 <Bar dataKey="value" fill="#00A7C7" radius={[6, 6, 0, 0]} />
@@ -305,7 +306,7 @@ export default function DashboardPage() {
       </div>
 
       {/* USER METRIC */}
-      <div className="bg-white border rounded-2xl p-6 shadow-sm space-y-4">
+      <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-4">
         {/* Header */}
         <div className="flex bg-neutral-50 items-center justify-between">
           <div>
@@ -332,7 +333,11 @@ export default function DashboardPage() {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={userMetricsChart}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" tick={{ fontSize: 12 }} axisLine={false} />
+                <XAxis
+                  dataKey="name"
+                  tick={{ fontSize: 12 }}
+                  axisLine={false}
+                />
                 <YAxis tick={{ fontSize: 12 }} axisLine={false} />
                 <Tooltip />
                 <Bar dataKey="value" fill="#00A7C7" radius={[6, 6, 0, 0]} />
@@ -353,7 +358,7 @@ interface SummaryCardProps {
 
 function SummaryCard({ title, value, icon }: SummaryCardProps) {
   return (
-    <div className="bg-white border rounded-2xl p-6 shadow-sm flex justify-between items-center">
+    <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm flex justify-between items-center">
       <div>
         <p className="text-xs tracking-wide text-gray-800">{title}</p>
         <p className="text-2xl text-gray-800 font-semibold mt-1">{value}</p>

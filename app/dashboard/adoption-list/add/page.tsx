@@ -331,7 +331,7 @@ export default function AddPetForAdoption() {
       </div>
 
       {/* ------------------- PET SNAPS ------------------- */}
-      <div className="bg-white border rounded-2xl p-5 shadow-sm">
+      <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
         <div className="flex justify-between items-center">
           <div>
             <p className="font-semibold text-gray-900">Pet Snaps</p>
@@ -367,7 +367,7 @@ export default function AddPetForAdoption() {
           {snaps.map((file, index) => (
             <div
               key={index}
-              className="border rounded-xl px-4 py-3 flex justify-between items-center bg-gray-50"
+              className="border border-gray-200 rounded-xl px-4 py-3 flex justify-between items-center bg-gray-50"
             >
               <div>
                 <p className="text-gray-800 font-medium">{file.name}</p>
@@ -389,7 +389,7 @@ export default function AddPetForAdoption() {
       </div>
 
       {/* ------------------- PET INFORMATION ------------------- */}
-      <div className="bg-white border rounded-2xl p-5 shadow-sm">
+      <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
         <button
           type="button"
           onClick={() => setPetInfoOpen(!petInfoOpen)}
@@ -481,7 +481,7 @@ export default function AddPetForAdoption() {
       </div>
 
       {/* ------------------- SHELTER INFORMATION ------------------- */}
-      <div className="bg-white border rounded-2xl p-5 shadow-sm">
+      <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
         <button
           type="button"
           onClick={() => setShelterInfoOpen(!shelterInfoOpen)}

@@ -130,9 +130,7 @@ export default function PrivacyPolicyPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-gray-900">
-          Privacy Policy
-        </h1>
+        <h1 className="text-2xl font-semibold text-gray-900">Privacy Policy</h1>
         <p className="text-sm text-gray-600">
           Update the privacy policy shown to users across the platform.
         </p>
@@ -144,11 +142,11 @@ export default function PrivacyPolicyPage() {
       </div>
 
       {status === "loading" ? (
-        <div className="bg-white border rounded-xl p-6 text-gray-600">
+        <div className="bg-white border border-gray-200 rounded-xl p-6 text-gray-600">
           Loading privacy policy...
         </div>
       ) : status === "failed" ? (
-        <div className="bg-white border rounded-xl p-6 text-red-600">
+        <div className="bg-white border border-gray-200 rounded-xl p-6 text-red-600">
           {error ?? "Failed to load privacy policy."}
         </div>
       ) : (

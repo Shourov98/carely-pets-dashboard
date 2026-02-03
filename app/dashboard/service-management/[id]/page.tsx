@@ -145,7 +145,11 @@ export default function ViewServicePage() {
             servicePrice: Number(payload?.orderSummary?.servicePrice ?? 0),
             items: Array.isArray(payload?.orderSummary?.items)
               ? payload.orderSummary.items.map(
-                  (item: { serviceName?: string; petName?: string; price?: number }) => ({
+                  (item: {
+                    serviceName?: string;
+                    petName?: string;
+                    price?: number;
+                  }) => ({
                     serviceName: item?.serviceName ?? "-",
                     petName: item?.petName ?? "-",
                     price: Number(item?.price ?? 0),
@@ -189,9 +193,7 @@ export default function ViewServicePage() {
 
   const isCompleted = serviceStatus?.toLowerCase() === "completed";
 
-  const updateServiceStatus = async (
-    nextStatus: "pending" | "completed",
-  ) => {
+  const updateServiceStatus = async (nextStatus: "pending" | "completed") => {
     if (!serviceRequestId) return;
     if (!normalizedBaseUrl) {
       setError("NEXT_PUBLIC_API_BASE_URL is not set.");
@@ -290,7 +292,9 @@ export default function ViewServicePage() {
 
       router.push("/dashboard/service-management");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete service.");
+      setError(
+        err instanceof Error ? err.message : "Failed to delete service.",
+      );
       setStatus("failed");
     }
   };
@@ -306,17 +310,20 @@ export default function ViewServicePage() {
       </p>
 
       {/* ACTION BUTTON */}
-      <div className="flex justify-end mt-4 relative" data-menu-root="service-action">
+      <div
+        className="flex justify-end mt-4 relative"
+        data-menu-root="service-action"
+      >
         <button
           onClick={() => setOpenMenu(!openMenu)}
-          className="flex items-center gap-2 border px-4 py-2 rounded-xl bg-white shadow-sm text-gray-800"
+          className="flex items-center gap-2 border border-gray-200 px-4 py-2 rounded-xl bg-white shadow-sm text-gray-800"
         >
           Action
           <ChevronDown className="h-4 w-4 text-gray-500" />
         </button>
 
         {openMenu && (
-          <div className="absolute right-0 mt-2 w-48 bg-white border shadow-lg rounded-xl z-20">
+          <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 shadow-lg rounded-xl z-20">
             <button
               className="w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
               onClick={() => setOpenMenu(false)}
@@ -334,7 +341,7 @@ export default function ViewServicePage() {
               Delete
             </button>
 
-            <div className="border-t my-1" />
+            <div className="border-t border-gray-200 my-1" />
 
             <p className="px-4 pt-1 text-xs text-gray-500">ACTION</p>
 
@@ -356,178 +363,185 @@ export default function ViewServicePage() {
       </div>
 
       {status === "loading" ? (
-        <div className="mt-6 bg-white border rounded-xl p-6 shadow-sm text-sm text-gray-600">
+        <div className="mt-6 bg-white border border-gray-200 rounded-xl p-6 shadow-sm text-sm text-gray-600">
           Loading service details...
         </div>
       ) : status === "failed" ? (
-        <div className="mt-6 bg-white border rounded-xl p-6 shadow-sm text-sm text-red-600">
+        <div className="mt-6 bg-white border border-gray-200 rounded-xl p-6 shadow-sm text-sm text-red-600">
           {error ?? "Failed to load service details."}
         </div>
       ) : (
         <>
-      {/* CUSTOMER INFORMATION */}
-      <div className="mt-6 bg-white border rounded-xl p-6 shadow-sm">
-        <div className="flex justify-between">
-          <h2 className="font-semibold text-gray-900">Customer Information</h2>
+          {/* CUSTOMER INFORMATION */}
+          <div className="mt-6 bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <div className="flex justify-between">
+              <h2 className="font-semibold text-gray-900">
+                Customer Information
+              </h2>
 
-          {isCompleted ? (
-            <span className="px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs flex items-center gap-2">
-              Completed{" "}
-              <span className="w-2 h-2 bg-green-600 rounded-full"></span>
-            </span>
-          ) : (
-            <span className="px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 text-xs flex items-center gap-2">
-              Pending{" "}
-              <span className="w-2 h-2 bg-yellow-600 rounded-full"></span>
-            </span>
-          )}
-        </div>
-
-        <div className="mt-4 grid grid-cols-1 md:grid-cols-4 gap-6 text-sm">
-          <div>
-            <p className="text-xs text-gray-500 uppercase">Name</p>
-            <p className="text-gray-800 font-medium">
-              {serviceData?.customer.name ?? "-"}
-            </p>
-          </div>
-
-          <div>
-            <p className="text-xs text-gray-500 uppercase">Phone</p>
-            <p className="text-gray-800 font-medium">
-              {serviceData?.customer.phone ?? "-"}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* SERVICE DETAILS */}
-      <div className="mt-4 bg-white border rounded-xl p-6 shadow-sm">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {/* SERVICE */}
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-              <BriefcaseMedical className="h-5 w-5 text-blue-600" />
+              {isCompleted ? (
+                <span className="px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs flex items-center gap-2">
+                  Completed{" "}
+                  <span className="w-2 h-2 bg-green-600 rounded-full"></span>
+                </span>
+              ) : (
+                <span className="px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 text-xs flex items-center gap-2">
+                  Pending{" "}
+                  <span className="w-2 h-2 bg-yellow-600 rounded-full"></span>
+                </span>
+              )}
             </div>
-            <div>
-              <p className="text-xs text-gray-500 uppercase">Service</p>
-              <p className="text-gray-800 font-medium">
-                {serviceData?.service.serviceName ?? "-"}
-              </p>
-            </div>
-          </div>
 
-          {/* DATE & TIME */}
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-              <Calendar className="h-5 w-5 text-blue-600" />
-            </div>
-            <div>
-              <p className="text-xs text-gray-500 uppercase">Date & Time</p>
-              <p className="text-gray-800 font-medium">{formattedDateTime}</p>
-            </div>
-          </div>
-
-          {/* WITH */}
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-              <User className="h-5 w-5 text-blue-600" />
-            </div>
-            <div>
-              <p className="text-xs text-gray-500 uppercase">With</p>
-              <p className="text-gray-800 font-medium">
-                {serviceData?.service.providerName || "Carely Pets"}
-              </p>
-            </div>
-          </div>
-
-          {/* FOR */}
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-              <PawPrint className="h-5 w-5 text-blue-600" />
-            </div>
-            <div>
-              <p className="text-xs text-gray-500 uppercase">For</p>
-              <p className="text-gray-800 font-medium">
-                {serviceData?.pet.name ?? "-"}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ORDER SUMMARY */}
-      <div className="mt-4 bg-white border rounded-xl p-6 shadow-sm">
-        <h2 className="font-semibold text-gray-900 mb-3">Order Summary</h2>
-
-        {(serviceData?.orderSummary.items ?? []).length > 0 ? (
-          serviceData?.orderSummary.items.map((item, index) => (
-            <div key={`${item.serviceName}-${index}`} className="flex justify-between text-sm mb-2">
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-4 gap-6 text-sm">
               <div>
+                <p className="text-xs text-gray-500 uppercase">Name</p>
                 <p className="text-gray-800 font-medium">
-                  {item.serviceName}
+                  {serviceData?.customer.name ?? "-"}
                 </p>
-                <p className="text-gray-600">{item.petName}</p>
               </div>
-              <p className="text-gray-800 font-medium">
-                {formatMoney(item.price)}
-              </p>
+
+              <div>
+                <p className="text-xs text-gray-500 uppercase">Phone</p>
+                <p className="text-gray-800 font-medium">
+                  {serviceData?.customer.phone ?? "-"}
+                </p>
+              </div>
             </div>
-          ))
-        ) : (
-          <div className="flex justify-between text-sm mb-2">
-            <div>
-              <p className="text-gray-800 font-medium">
-                {serviceData?.orderSummary.serviceName ?? "-"}
-              </p>
-              <p className="text-gray-600">
-                {serviceData?.orderSummary.petName ?? "-"}
-              </p>
-            </div>
-            <p className="text-gray-800 font-medium">
-              {formatMoney(serviceData?.orderSummary.servicePrice ?? 0)}
-            </p>
           </div>
-        )}
 
-        <div className="flex justify-between text-sm">
-          <p className="text-gray-700">Subtotal</p>
-          <p className="text-gray-800 font-medium">
-            {formatMoney(serviceData?.payment.subtotal ?? 0)}
-          </p>
-        </div>
+          {/* SERVICE DETAILS */}
+          <div className="mt-4 bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              {/* SERVICE */}
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                  <BriefcaseMedical className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 uppercase">Service</p>
+                  <p className="text-gray-800 font-medium">
+                    {serviceData?.service.serviceName ?? "-"}
+                  </p>
+                </div>
+              </div>
 
-        <div className="flex justify-between text-sm mt-1">
-          <p className="text-gray-700">Tax</p>
-          <p className="text-gray-800 font-medium">
-            ({serviceData?.payment.taxPercent ?? 0}%)
-            {` ${formatMoney(
-              ((serviceData?.payment.subtotal ?? 0) *
-                (serviceData?.payment.taxPercent ?? 0)) /
-                100,
-            )}`}
-          </p>
-        </div>
+              {/* DATE & TIME */}
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                  <Calendar className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 uppercase">Date & Time</p>
+                  <p className="text-gray-800 font-medium">
+                    {formattedDateTime}
+                  </p>
+                </div>
+              </div>
 
-        <div className="flex justify-between text-base font-semibold text-gray-900 mt-4 pt-3 border-t">
-          <p>Total</p>
-          <p>{formatMoney(serviceData?.payment.total ?? 0)}</p>
-        </div>
-      </div>
+              {/* WITH */}
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                  <User className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 uppercase">With</p>
+                  <p className="text-gray-800 font-medium">
+                    {serviceData?.service.providerName || "Carely Pets"}
+                  </p>
+                </div>
+              </div>
 
-      {/* PAYMENT STATUS */}
-      <div className="mt-4 bg-white border rounded-xl p-6 shadow-sm text-center text-gray-800 font-medium flex justify-center items-center gap-2">
-        {serviceData?.payment.status ?? "unpaid"}
-        <span
-          className={`w-4 h-4 rounded-full flex items-center justify-center ${
-            serviceData?.payment.status === "paid"
-              ? "bg-green-500"
-              : "bg-yellow-500"
-          }`}
-        >
-          <span className="w-2 h-2 bg-white rounded-full"></span>
-        </span>
-      </div>
-      </>
+              {/* FOR */}
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                  <PawPrint className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 uppercase">For</p>
+                  <p className="text-gray-800 font-medium">
+                    {serviceData?.pet.name ?? "-"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ORDER SUMMARY */}
+          <div className="mt-4 bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <h2 className="font-semibold text-gray-900 mb-3">Order Summary</h2>
+
+            {(serviceData?.orderSummary.items ?? []).length > 0 ? (
+              serviceData?.orderSummary.items.map((item, index) => (
+                <div
+                  key={`${item.serviceName}-${index}`}
+                  className="flex justify-between text-sm mb-2"
+                >
+                  <div>
+                    <p className="text-gray-800 font-medium">
+                      {item.serviceName}
+                    </p>
+                    <p className="text-gray-600">{item.petName}</p>
+                  </div>
+                  <p className="text-gray-800 font-medium">
+                    {formatMoney(item.price)}
+                  </p>
+                </div>
+              ))
+            ) : (
+              <div className="flex justify-between text-sm mb-2">
+                <div>
+                  <p className="text-gray-800 font-medium">
+                    {serviceData?.orderSummary.serviceName ?? "-"}
+                  </p>
+                  <p className="text-gray-600">
+                    {serviceData?.orderSummary.petName ?? "-"}
+                  </p>
+                </div>
+                <p className="text-gray-800 font-medium">
+                  {formatMoney(serviceData?.orderSummary.servicePrice ?? 0)}
+                </p>
+              </div>
+            )}
+
+            <div className="flex justify-between text-sm">
+              <p className="text-gray-700">Subtotal</p>
+              <p className="text-gray-800 font-medium">
+                {formatMoney(serviceData?.payment.subtotal ?? 0)}
+              </p>
+            </div>
+
+            <div className="flex justify-between text-sm mt-1">
+              <p className="text-gray-700">Tax</p>
+              <p className="text-gray-800 font-medium">
+                ({serviceData?.payment.taxPercent ?? 0}%)
+                {` ${formatMoney(
+                  ((serviceData?.payment.subtotal ?? 0) *
+                    (serviceData?.payment.taxPercent ?? 0)) /
+                    100,
+                )}`}
+              </p>
+            </div>
+
+            <div className="flex justify-between text-base font-semibold text-gray-900 mt-4 pt-3 border-t border-gray-400">
+              <p>Total</p>
+              <p>{formatMoney(serviceData?.payment.total ?? 0)}</p>
+            </div>
+          </div>
+
+          {/* PAYMENT STATUS */}
+          <div className="mt-4 bg-white border border-gray-200 rounded-xl p-6 shadow-sm text-center text-gray-800 font-medium flex justify-center items-center gap-2">
+            {serviceData?.payment.status ?? "unpaid"}
+            <span
+              className={`w-4 h-4 rounded-full flex items-center justify-center ${
+                serviceData?.payment.status === "paid"
+                  ? "bg-green-500"
+                  : "bg-yellow-500"
+              }`}
+            >
+              <span className="w-2 h-2 bg-white rounded-full"></span>
+            </span>
+          </div>
+        </>
       )}
 
       {/* DELETE MODAL */}
