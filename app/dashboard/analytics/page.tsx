@@ -85,7 +85,7 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchBreakdown = async () => {
       const monthIndex = months.indexOf(selectedMonth);
-      if (monthIndex < 0) return;
+      if (monthIndex <= 0) return;
       if (!normalizedBaseUrl) {
         setBreakdownError("NEXT_PUBLIC_API_BASE_URL is not set.");
         setBreakdownStatus("failed");
